@@ -1,6 +1,6 @@
-#include <nestedtensor/csrc/creation.h>
-#include <nestedtensor/csrc/utils/nested_node_functions.h>
-#include <nestedtensor/csrc/utils/python_nested_node.h>
+#include <ATen/nestedtensor/creation.h>
+#include <ATen/nestedtensor/nested_node_functions.h>
+#include <ATen/nestedtensor/python_nested_node.h>
 
 namespace torch {
 namespace nested_tensor {

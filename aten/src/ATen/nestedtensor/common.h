@@ -1,6 +1,6 @@
 #pragma once
-#include <nestedtensor/csrc/utils/nested_node.h>
-#include <nestedtensor/csrc/utils/nested_node_functions.h>
+#include <ATen/nestedtensor/nested_node.h>
+#include <ATen/nestedtensor/nested_node_functions.h>
 #include <torch/extension.h>
 
 namespace torch {

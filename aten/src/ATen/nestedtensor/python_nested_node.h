@@ -1,6 +1,6 @@
 #pragma once
-#include <nestedtensor/csrc/utils/nested_node.h>
-#include <nestedtensor/csrc/py_utils.h>
+#include <ATen/nestedtensor/nested_node.h>
+#include <ATen/nestedtensor/py_utils.h>
 #include <torch/csrc/jit/python/pybind_utils.h>
 
 namespace torch {

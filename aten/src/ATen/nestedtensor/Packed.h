@@ -1,6 +1,6 @@
 #pragma once
-#include <nestedtensor/csrc/storage/EfficientSizeNode.h>
-#include <nestedtensor/csrc/utils/nested_node.h>
+#include <ATen/nestedtensor/EfficientSizeNode.h>
+#include <ATen/nestedtensor/nested_node.h>
 #include <c10/core/MemoryFormat.h>
 
 namespace torch {

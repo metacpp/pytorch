@@ -1,8 +1,8 @@
-#include <nestedtensor/csrc/creation.h>
-#include <nestedtensor/csrc/nested_tensor_impl.h>
-#include <nestedtensor/csrc/python_functions.h>
-#include <nestedtensor/csrc/utils/nested_node_functions.h>
-#include <nestedtensor/csrc/utils/python_nested_node.h>
+#include <ATen/nestedtensor/creation.h>
+#include <ATen/nestedtensor/nested_tensor_impl.h>
+#include <ATen/nestedtensor/python_functions.h>
+#include <ATen/nestedtensor/utils/nested_node_functions.h>
+#include <ATen/nestedtensor/utils/python_nested_node.h>
 #include <torch/csrc/Size.h>
 #include <torch/csrc/autograd/python_variable_indexing.h>
 #include <torch/extension.h>

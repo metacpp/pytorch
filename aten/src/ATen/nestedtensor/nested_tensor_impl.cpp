@@ -2,8 +2,8 @@
 #include <ATen/NamedTensorUtils.h>
 #include <ATen/WrapDimUtils.h>
 #include <ATen/core/op_registration/op_registration.h>
-#include <nestedtensor/csrc/nested_tensor_impl.h>
-#include <nestedtensor/csrc/utils/nested_node_functions.h>
+#include <ATen/nestedtensor/nested_tensor_impl.h>
+#include <ATen/nestedtensor/nested_node_functions.h>
 #include <torch/csrc/jit/runtime/operator.h>
 #include <torch/library.h>
 #include <c10/core/DispatchKey.h>
