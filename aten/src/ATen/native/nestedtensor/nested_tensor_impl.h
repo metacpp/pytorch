@@ -2,9 +2,9 @@
 #include <ATen/ATen.h>
 #include <ATen/MemoryOverlap.h>
 #include <c10/util/Metaprogramming.h>
-#include <ATen/nestedtensor/Packed.h>
-#include <ATen/nestedtensor/nested_node.h>
-#include <ATen/nestedtensor/nested_node_functions.h>
+#include <ATen/native/nestedtensor/Packed.h>
+#include <ATen/native/nestedtensor/nested_node.h>
+#include <ATen/native/nestedtensor/nested_node_functions.h>
 // #include <torch/csrc/autograd/autograd.h>
 // #include <torch/extension.h>
 // #include <torch/library.h>

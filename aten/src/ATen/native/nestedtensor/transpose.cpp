@@ -1,5 +1,5 @@
-#include <ATen/nestedtensor/nested_tensor_impl.h>
-#include <ATen/nestedtensor/nested_node_functions.h>
+#include <ATen/native/nestedtensor/nested_tensor_impl.h>
+#include <ATen/native/nestedtensor/nested_node_functions.h>
 // #include <torch/extension.h>
 // #include <torch/library.h>
 // #ifdef WITH_CUDA
@@ -8,7 +8,7 @@
 // #include <c10/util/Half.h>
 // #include <ATen/cuda/CUDAContext.h>
 // #endif
-#include <ATen/nestedtensor/transpose.h>
+#include <ATen/native/nestedtensor/transpose.h>
 
 // // using namespace torch::nn;
 // // namespace F = torch::nn::functional;

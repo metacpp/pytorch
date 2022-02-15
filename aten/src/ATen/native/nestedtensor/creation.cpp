@@ -1,7 +1,7 @@
-#include <ATen/nestedtensor/creation.h>
-#include <ATen/nestedtensor/nested_tensor_impl.h>
-#include <ATen/nestedtensor/py_utils.h>
-#include <ATen/nestedtensor/nested_node.h>
+#include <ATen/nestedtensor/native/creation.h>
+#include <ATen/nestedtensor/native/nested_tensor_impl.h>
+#include <ATen/nestedtensor/native/py_utils.h>
+#include <ATen/nestedtensor/native/nested_node.h>
 // #include <torch/csrc/jit/python/pybind_utils.h>
 // #include <torch/extension.h>
 

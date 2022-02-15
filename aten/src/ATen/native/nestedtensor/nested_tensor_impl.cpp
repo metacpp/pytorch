@@ -2,12 +2,12 @@
 #include <ATen/NamedTensorUtils.h>
 #include <ATen/WrapDimUtils.h>
 #include <ATen/core/op_registration/op_registration.h>
-#include <ATen/nestedtensor/nested_tensor_impl.h>
-#include <ATen/nestedtensor/nested_node_functions.h>
+#include <ATen/native/nestedtensor/nested_tensor_impl.h>
+#include <ATen/native/nestedtensor/nested_node_functions.h>
 // #include <torch/csrc/jit/runtime/operator.h>
 // #include <torch/library.h>
 #include <c10/core/DispatchKey.h>
-#include <ATen/nestedtensor/transpose.h>
+#include <ATen/native/nestedtensor/transpose.h>
 
 namespace at {
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <ATen/nestedtensor/common.h>
+#include <ATen/native/nestedtensor/common.h>
 
 namespace torch {
 namespace nested_tensor {
