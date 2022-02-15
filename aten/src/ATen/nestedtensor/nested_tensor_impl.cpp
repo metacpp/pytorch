@@ -4,10 +4,10 @@
 #include <ATen/core/op_registration/op_registration.h>
 #include <ATen/nestedtensor/nested_tensor_impl.h>
 #include <ATen/nestedtensor/nested_node_functions.h>
-#include <torch/csrc/jit/runtime/operator.h>
-#include <torch/library.h>
+// #include <torch/csrc/jit/runtime/operator.h>
+// #include <torch/library.h>
 #include <c10/core/DispatchKey.h>
-#include <nestedtensor/csrc/transpose.h>
+#include <ATen/nestedtensor/transpose.h>
 
 namespace at {
 
@@ -162,37 +162,37 @@ Tensor NestedTensor_contiguous(const Tensor& self, MemoryFormat memory_format) {
       memory_format != MemoryFormat::Preserve,
       "preserve memory format is unsupported by the contiguous operator");
   if (memory_format == at::MemoryFormat::Contiguous) {
-    if (get_is_contiguous(self, c10::MemoryFormat::ChannelsLast)) {
-      auto transposed_sizes = map_efficient_size([](int64_t* size_ptr, int64_t size) {
-          // nchw
-          int64_t tmp = size_ptr[0];
-          size_ptr[0] = size_ptr[2];
-          size_ptr[2] = tmp;
-          // nwhc
-          tmp = size_ptr[0];
-          size_ptr[0] = size_ptr[1];
-          size_ptr[1] = tmp;
-          // nhwc
-          }, get_efficient_nested_size(self));
-      Tensor self_transposed = wrap_buffer(get_buffer(self), transposed_sizes);
-      return transpose_nhwc_nchw(self_transposed);
-    }
+    // if (get_is_contiguous(self, c10::MemoryFormat::ChannelsLast)) {
+    //   auto transposed_sizes = map_efficient_size([](int64_t* size_ptr, int64_t size) {
+    //       // nchw
+    //       int64_t tmp = size_ptr[0];
+    //       size_ptr[0] = size_ptr[2];
+    //       size_ptr[2] = tmp;
+    //       // nwhc
+    //       tmp = size_ptr[0];
+    //       size_ptr[0] = size_ptr[1];
+    //       size_ptr[1] = tmp;
+    //       // nhwc
+    //       }, get_efficient_nested_size(self));
+    //   Tensor self_transposed = wrap_buffer(get_buffer(self), transposed_sizes);
+    //   return transpose_nhwc_nchw(self_transposed);
+    // }
     return at::detail::make_tensor<NestedTensorImpl>(get_nested_tensor_structure(self));
   }
-  if (memory_format == at::MemoryFormat::ChannelsLast) {
-    Tensor self_cont = self;
-    if (!get_is_contiguous(self, c10::MemoryFormat::Contiguous)) {
-      self_cont = NestedTensor_contiguous(self, at::MemoryFormat::Contiguous);
-    }
-    TORCH_CHECK(get_dim(self_cont) == 4, "ChannelsLast memory format requires 4 dim input.");
-    auto new_strides = map_efficient_size([](int64_t* stride_ptr, int64_t* size_ptr, int64_t size) {
-        stride_ptr[2] = size_ptr[0];
-        stride_ptr[1] = stride_ptr[2] * size_ptr[2];
-        stride_ptr[0] = 1;
-        }, get_efficient_nested_stride(self_cont), get_efficient_nested_size(self_cont));
-    self_cont = transpose_nchw_nhwc(self_cont);
-    return wrap_buffer(get_buffer(self_cont), get_efficient_nested_size(self), new_strides);
-  }
+  // if (memory_format == at::MemoryFormat::ChannelsLast) {
+  //   Tensor self_cont = self;
+  //   if (!get_is_contiguous(self, c10::MemoryFormat::Contiguous)) {
+  //     self_cont = NestedTensor_contiguous(self, at::MemoryFormat::Contiguous);
+  //   }
+  //   TORCH_CHECK(get_dim(self_cont) == 4, "ChannelsLast memory format requires 4 dim input.");
+  //   auto new_strides = map_efficient_size([](int64_t* stride_ptr, int64_t* size_ptr, int64_t size) {
+  //       stride_ptr[2] = size_ptr[0];
+  //       stride_ptr[1] = stride_ptr[2] * size_ptr[2];
+  //       stride_ptr[0] = 1;
+  //       }, get_efficient_nested_stride(self_cont), get_efficient_nested_size(self_cont));
+  //   self_cont = transpose_nchw_nhwc(self_cont);
+  //   return wrap_buffer(get_buffer(self_cont), get_efficient_nested_size(self), new_strides);
+  // }
   TORCH_CHECK(false, "Given memory format ", memory_format, " not supported by NestedTensor_contiguous.");
   return self;
 }

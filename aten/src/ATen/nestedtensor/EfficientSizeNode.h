@@ -8,7 +8,7 @@ namespace impl {
 inline at::Tensor stack_sizes(SizeNode size_node) {
   TORCH_CHECK(size_node.height() == 1, "stack_sizes: Expected height equals 1.");
   if (size_node.degree() == 0) {
-    return torch::zeros({}, torch::kInt64);
+    return at::zeros({}, at::kLong);
   }
   std::vector<SizeNode> unbound_size_node = size_node.unbind();
   std::vector<int64_t> result_sizes_vector;
@@ -21,7 +21,7 @@ inline at::Tensor stack_sizes(SizeNode size_node) {
       result_sizes_vector.push_back(sizes[j]);
     }
   }
-  return torch::tensor(result_sizes_vector, torch::kInt64).reshape({static_cast<int64_t>(size_node.degree()), -1});
+  return at::tensor(c10::IntArrayRef(result_sizes_vector), at::kLong).reshape({static_cast<int64_t>(size_node.degree()), -1});
 }
 
 inline std::vector<c10::optional<int64_t>> construct_efficient_size(
@@ -118,10 +118,10 @@ struct EfficientSizeNode {
       if (_sizes.numel() == 0) {
         return 0;
       }
-      Tensor nt_sizes = at::native::narrow(
+      at::Tensor nt_sizes = at::native::narrow(
           _sizes, 1 /* dim */, 0 /* start */, 1 /* length */);
       for (int64_t i = 1; i < _sizes.size(1); i++) {
-        Tensor tmp = at::native::narrow(
+        at::Tensor tmp = at::native::narrow(
             _sizes, 1 /* dim */, i /* start */, 1 /* length */);
         nt_sizes = nt_sizes * tmp;
       }

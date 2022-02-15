@@ -5,9 +5,9 @@
 #include <ATen/nestedtensor/Packed.h>
 #include <ATen/nestedtensor/nested_node.h>
 #include <ATen/nestedtensor/nested_node_functions.h>
-#include <torch/csrc/autograd/autograd.h>
-#include <torch/extension.h>
-#include <torch/library.h>
+// #include <torch/csrc/autograd/autograd.h>
+// #include <torch/extension.h>
+// #include <torch/library.h>
 
 // #define TRACEPACKED 1
 // #define USEPACKED 1
@@ -323,36 +323,36 @@ inline bool is_tensor_shape(const at::Tensor tensor) {
 
 Tensor NestedTensor_to_tensor(Tensor tensor, c10::optional<int64_t> dim_);
 
-inline Tensor NestedTensor_to_sparse_csr(Tensor tensor) {
-  TORCH_CHECK(
-      get_dim(tensor) == 2,
-      "Given tensor must be of dimension 2, got dimension ",
-      get_dim(tensor));
-  Tensor values;
-  if (get_is_contiguous(tensor)) {
-    values = get_buffer(tensor).reshape({-1});
-  } else {
-    values = at::cat(flatten(get_nested_tensor_structure(tensor)));
-  }
-  auto tensor_sizes = get_efficient_nested_size(tensor).sizes();
-  tensor_sizes = tensor_sizes.reshape({-1});
-  int64_t* tensor_sizes_ptr = tensor_sizes.data_ptr<int64_t>();
-  at::Tensor crow_indices =
-      at::cat({torch::tensor({0}), at::cumsum(tensor_sizes, 0)});
-  std::vector<at::Tensor> col_indices_;
-  for (int64_t i = 0; i < tensor_sizes.size(0); i++) {
-    col_indices_.push_back(torch::arange({tensor_sizes_ptr[i]}));
-  }
-  at::Tensor col_indices = at::cat(col_indices_);
-  return at::native::sparse_csr_tensor(
-      crow_indices, col_indices, values, c10::nullopt, torch::kSparseCsr);
-}
+// inline Tensor NestedTensor_to_sparse_csr(Tensor tensor) {
+//   TORCH_CHECK(
+//       get_dim(tensor) == 2,
+//       "Given tensor must be of dimension 2, got dimension ",
+//       get_dim(tensor));
+//   Tensor values;
+//   if (get_is_contiguous(tensor)) {
+//     values = get_buffer(tensor).reshape({-1});
+//   } else {
+//     values = at::cat(flatten(get_nested_tensor_structure(tensor)));
+//   }
+//   auto tensor_sizes = get_efficient_nested_size(tensor).sizes();
+//   tensor_sizes = tensor_sizes.reshape({-1});
+//   int64_t* tensor_sizes_ptr = tensor_sizes.data_ptr<int64_t>();
+//   at::Tensor crow_indices =
+//       at::cat({torch::tensor({0}), at::cumsum(tensor_sizes, 0)});
+//   std::vector<at::Tensor> col_indices_;
+//   for (int64_t i = 0; i < tensor_sizes.size(0); i++) {
+//     col_indices_.push_back(torch::arange({tensor_sizes_ptr[i]}));
+//   }
+//   at::Tensor col_indices = at::cat(col_indices_);
+//   return at::native::sparse_csr_tensor(
+//       crow_indices, col_indices, values, c10::nullopt, torch::kSparseCsr);
+// }
 
 inline std::ostream& operator<<(
     std::ostream& out,
     const NestedTensorImpl& batch_tensor) {
   auto node = batch_tensor.get_structure();
-  out << "NESTED_TENSOR";
+  // out << "NESTED_TENSOR";
   apply([&out](at::Tensor tensor) { out << tensor << std::endl; }, node);
   out << std::endl;
   return out;
@@ -368,7 +368,7 @@ struct _Function_trace_wrapper<
   using ReturnType = typename c10::guts::infer_function_traits_t<
       typename FuncPtr::FuncType>::return_type;
   static ReturnType apply(Parameters... args) {
-    std::cout << "Calling " << typeid(FuncPtr).name() << std::endl;
+    // std::cout << "Calling " << typeid(FuncPtr).name() << std::endl;
     return (*FuncPtr::func_ptr())(args...);
   }
 };

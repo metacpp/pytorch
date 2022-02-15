@@ -1,29 +1,29 @@
 #include <ATen/nestedtensor/creation.h>
 #include <ATen/nestedtensor/nested_tensor_impl.h>
 #include <ATen/nestedtensor/py_utils.h>
-#include <ATen/nestedtensor/utils/nested_node.h>
-#include <torch/csrc/jit/python/pybind_utils.h>
-#include <torch/extension.h>
+#include <ATen/nestedtensor/nested_node.h>
+// #include <torch/csrc/jit/python/pybind_utils.h>
+// #include <torch/extension.h>
 
-namespace py = pybind11;
+// namespace py = pybind11;
 
 namespace torch {
 namespace nested_tensor {
 
-using namespace torch::jit;
+// using namespace torch::jit;
 
-NestedNode<py::object> py_to_nested_node(py::object&& py_obj) {
-  if (py::isinstance<py::list>(py_obj) || py::isinstance<py::tuple>(py_obj)) {
-    std::vector<NestedNode<py::object>> result;
-    auto py_seq = py::sequence(py_obj);
-    for (size_t i = 0; i < py_seq.size(); i++) {
-      py::object py_seq_i(py_seq[i]);
-      result.emplace_back(py_to_nested_node(std::move(py_seq_i)));
-    }
-    return NestedNode<py::object>(std::move(result));
-  }
-  TORCH_CHECK(false, "Currently only supporting a list or tuple of py::object.");
-}
+// NestedNode<py::object> py_to_nested_node(py::object&& py_obj) {
+//   if (py::isinstance<py::list>(py_obj) || py::isinstance<py::tuple>(py_obj)) {
+//     std::vector<NestedNode<py::object>> result;
+//     auto py_seq = py::sequence(py_obj);
+//     for (size_t i = 0; i < py_seq.size(); i++) {
+//       py::object py_seq_i(py_seq[i]);
+//       result.emplace_back(py_to_nested_node(std::move(py_seq_i)));
+//     }
+//     return NestedNode<py::object>(std::move(result));
+//   }
+//   TORCH_CHECK(false, "Currently only supporting a list or tuple of py::object.");
+// }
 
 bool _verify_variables(
     const int64_t dim,
@@ -170,56 +170,56 @@ bool _verify_variables(
       throw_error);
 }
 
-TensorNode py_to_nested_tensor(const py::object& py_obj) {
-  if (py::isinstance<py::sequence>(py_obj)) {
-    std::vector<TensorNode> result;
-    auto py_seq = py::sequence(py_obj);
-    for (size_t i = 0; i < py_seq.size(); i++) {
-      const py::object& py_seq_i = py_seq[i];
-      TORCH_CHECK(THPVariable_Check(py_seq_i.ptr()),
-          "Currently only supporting a sequence of Tensors.");
-      at::Tensor tensor = THPVariable_Unpack(py_seq_i.ptr());
-      TORCH_CHECK(!is_nested_tensor_impl(tensor),
-          "Currently do not support NestedTensor entries.");
-      result.emplace_back(TensorNode(std::move(tensor)));
-    }
-    return TensorNode(std::move(result));
-  }
-  TORCH_CHECK(false, "Currently only supporting a flat sequence of Tensors.");
-}
+// TensorNode py_to_nested_tensor(const py::object& py_obj) {
+//   if (py::isinstance<py::sequence>(py_obj)) {
+//     std::vector<TensorNode> result;
+//     auto py_seq = py::sequence(py_obj);
+//     for (size_t i = 0; i < py_seq.size(); i++) {
+//       const py::object& py_seq_i = py_seq[i];
+//       TORCH_CHECK(THPVariable_Check(py_seq_i.ptr()),
+//           "Currently only supporting a sequence of Tensors.");
+//       at::Tensor tensor = THPVariable_Unpack(py_seq_i.ptr());
+//       TORCH_CHECK(!is_nested_tensor_impl(tensor),
+//           "Currently do not support NestedTensor entries.");
+//       result.emplace_back(TensorNode(std::move(tensor)));
+//     }
+//     return TensorNode(std::move(result));
+//   }
+//   TORCH_CHECK(false, "Currently only supporting a flat sequence of Tensors.");
+// }
 
-at::Tensor nested_tensor_impl(
-    py::sequence list,
-    py::object dtype_,
-    py::object device_,
-    bool requires_grad,
-    bool pin_memory,
-    bool channels_last) {
-  if (requires_grad) {
-    throw std::runtime_error(
-        "This version of nestedtensor currently does not support autograd. Please open an issue on https://github.com/pytorch/nestedtensor if you need this.");
-  }
-  auto dtype = toTypeInferredIValue(dtype_).toScalarType();
-  auto device = toTypeInferredIValue(device_).toDevice();
-  TensorNode ivalue_structure = py_to_nested_tensor(list);
-  if (auto first = get_first_leaf(ivalue_structure)) {
-    if (!_verify_variables(*first, ivalue_structure)) {
-      _verify_variables(*first, ivalue_structure, true);
-    }
-  }
-  Tensor result = wrap_tensor_node(std::move(ivalue_structure));
-  Tensor buffer = get_buffer(result);
-  buffer = buffer.to(device, dtype);
-  if (pin_memory) {
-    buffer = buffer.pin_memory();
-  }
-  result = wrap_buffer(std::move(buffer), get_efficient_nested_size(result));
-  if (channels_last) {
-    result = NestedTensor_contiguous(result, c10::MemoryFormat::ChannelsLast);
-    return result;
-  }
-  return result;
-}
+// at::Tensor nested_tensor_impl(
+//     py::sequence list,
+//     py::object dtype_,
+//     py::object device_,
+//     bool requires_grad,
+//     bool pin_memory,
+//     bool channels_last) {
+//   if (requires_grad) {
+//     throw std::runtime_error(
+//         "This version of nestedtensor currently does not support autograd. Please open an issue on https://github.com/pytorch/nestedtensor if you need this.");
+//   }
+//   auto dtype = toTypeInferredIValue(dtype_).toScalarType();
+//   auto device = toTypeInferredIValue(device_).toDevice();
+//   TensorNode ivalue_structure = py_to_nested_tensor(list);
+//   if (auto first = get_first_leaf(ivalue_structure)) {
+//     if (!_verify_variables(*first, ivalue_structure)) {
+//       _verify_variables(*first, ivalue_structure, true);
+//     }
+//   }
+//   Tensor result = wrap_tensor_node(std::move(ivalue_structure));
+//   Tensor buffer = get_buffer(result);
+//   buffer = buffer.to(device, dtype);
+//   if (pin_memory) {
+//     buffer = buffer.pin_memory();
+//   }
+//   result = wrap_buffer(std::move(buffer), get_efficient_nested_size(result));
+//   if (channels_last) {
+//     result = NestedTensor_contiguous(result, c10::MemoryFormat::ChannelsLast);
+//     return result;
+//   }
+//   return result;
+// }
 
 } // namespace nested_tensor
 } // namespace torch

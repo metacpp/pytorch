@@ -152,7 +152,7 @@ inline bool storage_is_contiguous_channels_last(
     strides[1] = strides_sizes_ptr[i * 3 + 0];
     strides[2] = strides_sizes_ptr[i * 3 + 1];
     strides[3] = strides_sizes_ptr[i * 3 + 2];
-    if (!c10::is_channels_last_strides_2d(IntArrayRef(sizes), IntArrayRef(strides))) {
+    if (!c10::is_channels_last_strides_2d(c10::IntArrayRef(sizes), c10::IntArrayRef(strides))) {
       return false;
     }
   }
