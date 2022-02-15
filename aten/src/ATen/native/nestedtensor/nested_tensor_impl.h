@@ -44,12 +44,10 @@ struct NestedTensorImpl : public c10::TensorImpl {
   explicit NestedTensorImpl(at::Tensor&& buffer, SizeNode nested_size);
   explicit NestedTensorImpl(TensorNode structure);
 
-#ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
   int64_t dim() const override {
-    TORCH_CHECK(
-        false, "dim is disabled. These methods are not virtual in fbcode.");
+    return _nested_size.dim();
   }
-#endif
+
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
   int64_t numel() const override {
     TORCH_CHECK(

@@ -111,5 +111,7 @@ class NestedTensor(metaclass=NestedTensorMeta):
 
     def __torch_function__(self, func, types, args=(), kwargs=None):
         print("HEE")
+        if func is torch.nn.functional.multi_head_attention_forward:
+            return _wrap_result(torch.nestedtensor.nn.mha.multi_head_attention_forward(*args, **kwargs))
         impl_args, impl_kwargs = _filter_impl(args, kwargs)
         return _wrap_result(func(*impl_args, **impl_kwargs))
