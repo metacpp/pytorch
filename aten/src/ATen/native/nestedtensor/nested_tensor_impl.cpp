@@ -10,6 +10,7 @@
 #include <ATen/native/nestedtensor/transpose.h>
 
 namespace at {
+namespace native {
 
 using namespace torch::nested_tensor;
 using namespace c10;
@@ -442,6 +443,13 @@ Tensor NestedTensor_to_dtype_layout(
       return NestedTensor_contiguous(result_nt, *optional_memory_format);
     }
     return result_nt;
+}
+
+
+bool is_nt_impl(const Tensor& tensor) {
+  return is_nested_tensor_impl(tensor);
+}
+
 }
 
 // TORCH_LIBRARY_IMPL(aten, NestedTensor, m) {

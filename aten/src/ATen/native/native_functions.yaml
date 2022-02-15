@@ -11253,3 +11253,6 @@
 
 - func: nested_tensor_constructor(Tensor[] list, ScalarType dtype, Device device, bool pin_memory, bool channels_last) -> Tensor
   variants: function
+
+- func: is_nt_impl(Tensor nt) -> bool
+  variants: function

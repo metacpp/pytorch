@@ -13,6 +13,7 @@
 // #define USEPACKED 1
 
 namespace at {
+namespace native {
 
 using namespace torch::nested_tensor;
 
@@ -22,7 +23,7 @@ struct NestedTensorImpl;
 
 template <class A>
 bool is_nested_tensor_impl(A tensor) {
-  return tensor.unsafeGetTensorImpl()->key_set().has(at::NestedTensorKey);
+  return tensor.unsafeGetTensorImpl()->key_set().has(c10::DispatchKey::NestedTensor);
 }
 
 template <class A, class B>
@@ -34,13 +35,6 @@ template <class A, class B, class... C>
 bool is_nested_tensor_impl(A first, B second, C... other) {
   return is_nested_tensor_impl(first, second) &&
       is_nested_tensor_impl(other...);
-}
-
-template <class F, class... A>
-inline void apply_nested_tensor(F&& fn, A... a) {
-  // torch_check_tensor_shape_matches(a...);
-  // torch_check_is_nested_tensor(a...);
-  apply(std::forward<F>(fn), get_nested_tensor_structure(a)...);
 }
 
 struct NestedTensorImpl : public c10::TensorImpl {
@@ -178,11 +172,11 @@ Tensor NestedTensor_to_nested_tensor(
     at::Tensor input,
     c10::optional<int64_t> dim__);
 
-inline at::NestedTensorImpl* get_nested_tensor_impl(const at::Tensor tensor) {
+inline at::native::NestedTensorImpl* get_nested_tensor_impl(const at::Tensor tensor) {
   if (!is_nested_tensor_impl(tensor)) {
     throw std::runtime_error("Function requires NestedTensorImpl");
   }
-  return static_cast<at::NestedTensorImpl*>(tensor.unsafeGetTensorImpl());
+  return static_cast<at::native::NestedTensorImpl*>(tensor.unsafeGetTensorImpl());
 }
 
 template <class A>
@@ -197,6 +191,14 @@ inline TensorNode get_nested_tensor_structure(at::Tensor tensor) {
   }
   return get_nested_tensor_impl(tensor)->get_structure();
 }
+
+template <class F, class... A>
+inline void apply_nested_tensor(F&& fn, A... a) {
+  // torch_check_tensor_shape_matches(a...);
+  // torch_check_is_nested_tensor(a...);
+  apply(std::forward<F>(fn), get_nested_tensor_structure(a)...);
+}
+
 
 inline at::Tensor get_buffer(const at::Tensor& tensor) {
   return get_nested_tensor_impl(tensor)->get_buffer();
@@ -389,3 +391,4 @@ constexpr auto trace(FuncPtr /*func_ptr*/) {
 #endif
 
 } // namespace at
+}
