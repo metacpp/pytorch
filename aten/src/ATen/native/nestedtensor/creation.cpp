@@ -219,10 +219,11 @@ at::Tensor nested_tensor_constructor(
     buffer = buffer.pin_memory();
   }
   result = wrap_buffer(std::move(buffer), get_efficient_nested_size(result));
-  if (channels_last) {
-    result = NestedTensor_contiguous(result, c10::MemoryFormat::ChannelsLast);
-    return result;
-  }
+  // if (channels_last) {
+  //   result = at::native::nested_tensor_contiguous(result, c10::MemoryFormat::ChannelsLast);
+  //   result = at::native::nested_tensor_contiguous(result, c10::MemoryFormat::ChannelsLast);
+  //   return result;
+  // }
   return result;
 }
 

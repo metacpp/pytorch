@@ -1369,7 +1369,7 @@
     SparseCPU, SparseCUDA, SparseHIP: copy_sparse_wrapper_
     CompositeExplicitAutograd: copy_
     SparseCsrCPU, SparseCsrCUDA: copy_sparse_csr_
-    NestedTensor: NestedTensor_contiguous
+    NestedTensor: NestedTensor_copy_
 
 - func: _copy_from(Tensor self, Tensor dst, bool non_blocking=False) -> Tensor
   dispatch: {}
@@ -11256,3 +11256,8 @@
 
 - func: is_nt_impl(Tensor nt) -> bool
   variants: function
+
+- func: nested_tensor_contiguous(Tensor(a) self) -> Tensor(a)
+  variants: function
+  dispatch:
+    NestedTensor: NestedTensor_contiguous

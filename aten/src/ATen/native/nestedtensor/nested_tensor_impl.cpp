@@ -155,14 +155,14 @@ at::Tensor wrap_buffer(
       efficient_nested_size);
 }
 
-Tensor NestedTensor_contiguous(const Tensor& self, MemoryFormat memory_format) {
-  if (get_is_contiguous(self, memory_format)) {
+Tensor NestedTensor_contiguous(const Tensor& self) {
+  if (get_is_contiguous(self)) {
     return self;
   }
-  TORCH_CHECK(
-      memory_format != MemoryFormat::Preserve,
-      "preserve memory format is unsupported by the contiguous operator");
-  if (memory_format == at::MemoryFormat::Contiguous) {
+  // TORCH_CHECK(
+  //     memory_format != MemoryFormat::Preserve,
+  //     "preserve memory format is unsupported by the contiguous operator");
+  // if (memory_format == at::MemoryFormat::Contiguous) {
     // if (get_is_contiguous(self, c10::MemoryFormat::ChannelsLast)) {
     //   auto transposed_sizes = map_efficient_size([](int64_t* size_ptr, int64_t size) {
     //       // nchw
@@ -179,7 +179,7 @@ Tensor NestedTensor_contiguous(const Tensor& self, MemoryFormat memory_format) {
     //   return transpose_nhwc_nchw(self_transposed);
     // }
     return at::detail::make_tensor<NestedTensorImpl>(get_nested_tensor_structure(self));
-  }
+  // }
   // if (memory_format == at::MemoryFormat::ChannelsLast) {
   //   Tensor self_cont = self;
   //   if (!get_is_contiguous(self, c10::MemoryFormat::Contiguous)) {
@@ -194,8 +194,8 @@ Tensor NestedTensor_contiguous(const Tensor& self, MemoryFormat memory_format) {
   //   self_cont = transpose_nchw_nhwc(self_cont);
   //   return wrap_buffer(get_buffer(self_cont), get_efficient_nested_size(self), new_strides);
   // }
-  TORCH_CHECK(false, "Given memory format ", memory_format, " not supported by NestedTensor_contiguous.");
-  return self;
+  // TORCH_CHECK(false, "Given memory format ", memory_format, " not supported by NestedTensor_contiguous.");
+  // return self;
 }
 
 bool NestedTensor_is_pinned(const Tensor& self, c10::optional<Device> device) {
@@ -440,7 +440,7 @@ Tensor NestedTensor_to_dtype_layout(
                                  get_efficient_nested_size(self),
                                  get_efficient_nested_stride(self));
     if (optional_memory_format) {
-      return NestedTensor_contiguous(result_nt, *optional_memory_format);
+      return at::native::nested_tensor_contiguous(result_nt); //, *optional_memory_format);
     }
     return result_nt;
 }

@@ -1628,6 +1628,7 @@ def main() -> None:
         # kernels
         DispatchKey.Meta,
         DispatchKey.ZeroTensor,
+        DispatchKey.NestedTensor,
     ]
     # Only a limited set of dispatch keys get CPUFunctions.h headers generated
     # for them; this is the set

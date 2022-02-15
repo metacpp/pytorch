@@ -253,9 +253,9 @@ inline int64_t get_numel(const at::Tensor& tensor) {
   return tensor.numel();
 }
 
-Tensor NestedTensor_contiguous(
-    const Tensor& self,
-    MemoryFormat memory_format = MemoryFormat::Contiguous);
+// Tensor NestedTensor_contiguous(
+//     const Tensor& self,
+//     MemoryFormat memory_format = MemoryFormat::Contiguous);
 
 inline bool get_is_contiguous(
     const at::Tensor& tensor,
