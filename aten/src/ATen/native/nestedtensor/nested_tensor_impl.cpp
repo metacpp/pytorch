@@ -450,6 +450,14 @@ bool is_nt_impl(const Tensor& tensor) {
   return is_nested_tensor_impl(tensor);
 }
 
+int64_t NestedTensor_size_int(const Tensor& tensor, int64_t d) const override {
+  auto maybe_int = get_opt_sizes(tensor)[d];
+  TORCH_CHECK(
+      maybe_int,
+      "NestedTensor is not regular across dimension ", d, ".");
+  return *maybe_int;
+}
+
 }
 
 // TORCH_LIBRARY_IMPL(aten, NestedTensor, m) {

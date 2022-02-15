@@ -11261,3 +11261,8 @@
   variants: function
   dispatch:
     NestedTensor: NestedTensor_contiguous
+
+- func: nested_tensor_size_int(Tensor self, int d) -> int
+  variants: function
+  dispatch:
+    NestedTensor: NestedTensor_size_int
