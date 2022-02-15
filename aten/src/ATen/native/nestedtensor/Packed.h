@@ -85,7 +85,7 @@ inline at::Tensor pack(const TensorNode& structure) {
     tensors[i] = tensor_nodes[i].payload();
     full_numel = full_numel + tensors[i].numel();
   }
-  at::Tensor result_buffer = empty({full_numel}, tensors[0].options());
+  at::Tensor result_buffer = at::empty({full_numel}, tensors[0].options());
   int64_t index = 0;
   for (size_t i = 0; i < tensors.size(); i++) {
     at::Tensor narrowed_result_buffer = 
