@@ -11252,3 +11252,4 @@
   python_module: nn
 
 - func: nested_tensor_constructor(Tensor[] list, ScalarType dtype, Device device, bool pin_memory, bool channels_last) -> Tensor
+  variants: function

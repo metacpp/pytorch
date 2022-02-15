@@ -9,7 +9,7 @@ import numbers
 
 
 
-class NestedTensor(torch.Tensor):
+class NestedTensor:
     # The attributes must match across all constiuents
     #
     # The NestedTensor's attributes then become that of its
@@ -28,4 +28,4 @@ class NestedTensor(torch.Tensor):
     # Levels of contiguity
 
     def __init__(self, impl):
-        return None
+        self._impl = impl

@@ -821,8 +821,8 @@ from torch import profiler as profiler
 # from torch import nestedtensor
 
 from torch.nestedtensor.nested.nested import NestedTensor
-# from .nestedtensor.nested.creation import as_nested_tensor
-# from .nestedtensor.nested.creation import nested_tensor
+from torch.nestedtensor.nested.creation import as_nested_tensor
+from torch.nestedtensor.nested.creation import nested_tensor
 
 # from .nested.masking import nested_tensor_from_tensor_mask
 # from .nested.masking import nested_tensor_from_padded_tensor
