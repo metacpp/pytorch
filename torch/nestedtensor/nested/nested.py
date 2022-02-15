@@ -36,6 +36,9 @@ def nt_multi_head_attention_forward(query,
     assert isinstance(value, torch.NestedTensor)
     assert torch.is_tensor(out_proj_weight)
     assert torch.is_tensor(out_proj_bias)
+    # Self-attention only
+    # CUDA only
+    assert query is key and key is value and in_proj_weight.is_cuda
 
     # TODO: Explicitly unsupported flags
     assert not use_separate_proj_weight
@@ -51,40 +54,23 @@ def nt_multi_head_attention_forward(query,
     # bsz, tgt_len, embed_dim = query.size()
     embed_dim = query.size(2)
     assert embed_dim == embed_dim_to_check
-    # allow MHA to have different sizes for the feature dimension
-    assert key.size(0) == value.size(0) and key.size(1) == value.size(1)
 
     head_dim = embed_dim // num_heads
     assert head_dim * num_heads == embed_dim, "embed_dim must be divisible by num_heads"
     scaling = float(head_dim) ** -0.5
 
-    if query is key and key is value and in_proj_weight.is_cuda:
-        return torch.ops.nestedtensor.bt_min_mha(num_heads,
-                                                 head_dim,
-                                                 0.5,
-                                                 False,
-                                                 query,
-                                                 query,
-                                                 query,
-                                                 in_proj_weight,
-                                                 in_proj_bias,
-                                                 scaling,
-                                                 out_proj_weight,
-                                                 in_proj_bias), None
-
-    return nestedtensor.nested.nested._wrap_result(
-        torch.ops.nestedtensor.min_mha(num_heads,
-                                       head_dim,
-                                       dropout_p,
-                                       training,
-                                       query._impl,
-                                       key._impl,
-                                       value._impl,
-                                       in_proj_weight,
-                                       in_proj_bias,
-                                       scaling,
-                                       out_proj_weight,
-                                       out_proj_bias)), None
+    return torch.ops.nestedtensor.bt_min_mha(num_heads,
+                                             head_dim,
+                                             0.5,
+                                             False,
+                                             query,
+                                             query,
+                                             query,
+                                             in_proj_weight,
+                                             in_proj_bias,
+                                             scaling,
+                                             out_proj_weight,
+                                             in_proj_bias), None
 
 def _filter_impl(args, kwargs):
     if kwargs is None:
@@ -170,6 +156,9 @@ class NestedTensor(metaclass=NestedTensorMeta):
         """
         # This NT only supports nesting of 1.
         return 1
+
+    def size(self, dim):
+        return torch.nested_tensor_size_int(self._impl, dim)
 
     def __str__(self):
         def _str(x, indent=0, tab="  "):

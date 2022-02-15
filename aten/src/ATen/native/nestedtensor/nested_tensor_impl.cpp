@@ -85,11 +85,8 @@ inline TensorNode _squeeze_nested_dim(TensorNode structure, int64_t dim) {
 int64_t NestedTensor_size_int(const Tensor& self, int64_t dim) {
   std::vector<c10::optional<int64_t>> size =
       get_nested_tensor_impl(self)->opt_sizes();
-  if (size[dim]) {
-    return *(size[dim]);
-  }
-  throw std::runtime_error(
-      "NestedTensor size at dim is not Tensor shape compliant.");
+  TORCH_CHECK(size[dim], "NestedTensor is not regular at dimension ", dim, ".");
+  return *(size[dim]);
 }
 
 int64_t nt_size(Tensor tensor, int64_t dim) {
@@ -448,14 +445,6 @@ Tensor NestedTensor_to_dtype_layout(
 
 bool is_nt_impl(const Tensor& tensor) {
   return is_nested_tensor_impl(tensor);
-}
-
-int64_t NestedTensor_size_int(const Tensor& tensor, int64_t d) const override {
-  auto maybe_int = get_opt_sizes(tensor)[d];
-  TORCH_CHECK(
-      maybe_int,
-      "NestedTensor is not regular across dimension ", d, ".");
-  return *maybe_int;
 }
 
 }
