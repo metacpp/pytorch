@@ -11257,7 +11257,7 @@
 - func: is_nt_impl(Tensor nt) -> bool
   variants: function
 
-- func: nested_tensor_contiguous(Tensor(a) self) -> Tensor(a)
+- func: nested_tensor_contiguous(Tensor self) -> Tensor
   variants: function
   dispatch:
     NestedTensor: NestedTensor_contiguous

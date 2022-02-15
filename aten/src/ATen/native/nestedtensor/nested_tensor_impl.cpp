@@ -439,9 +439,9 @@ Tensor NestedTensor_to_dtype_layout(
                                                  non_blocking, copy, c10::nullopt),
                                  get_efficient_nested_size(self),
                                  get_efficient_nested_stride(self));
-    if (optional_memory_format) {
-      return at::native::nested_tensor_contiguous(result_nt); //, *optional_memory_format);
-    }
+    // if (optional_memory_format) {
+    //   return at::nested_tensor_contiguous(result_nt); //, *optional_memory_format);
+    // }
     return result_nt;
 }
 
