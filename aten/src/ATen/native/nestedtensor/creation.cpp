@@ -212,7 +212,7 @@ at::Tensor nested_tensor_constructor(
   //   }
   // }
   // Tensor result = wrap_tensor_node(std::move(ivalue_structure));
-  Tensor result = wrap_tensor_node(torch::nested_tensor::TensorNode(list_nodes));
+  Tensor result = wrap_tensor_node(torch::nested_tensor::TensorNode(std::move(list_nodes)));
   Tensor buffer = get_buffer(result);
   buffer = buffer.to(device, dtype);
   if (pin_memory) {
