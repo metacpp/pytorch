@@ -1369,7 +1369,6 @@
     SparseCPU, SparseCUDA, SparseHIP: copy_sparse_wrapper_
     CompositeExplicitAutograd: copy_
     SparseCsrCPU, SparseCsrCUDA: copy_sparse_csr_
-    NestedTensor: NestedTensor_copy_
 
 - func: _copy_from(Tensor self, Tensor dst, bool non_blocking=False) -> Tensor
   dispatch: {}
@@ -3429,7 +3428,6 @@
   dispatch:
     CUDA: is_pinned_cuda
     CompositeExplicitAutograd: is_pinned_default
-    NestedTensor: NestedTensor_is_pinned
 
 # TODO: add a copy kwarg that guarantees that the tensor is put into fresh
 # pinned memory
@@ -3825,7 +3823,6 @@
   device_guard: False
   dispatch:
     CompositeExplicitAutograd: select
-    NestedTensor: NestedTensor_select
 
 - func: select_backward(Tensor grad_output, int[] input_sizes, int dim, int index) -> Tensor
   variants: function
@@ -4049,7 +4046,6 @@
   device_guard: False
   dispatch:
     CompositeExplicitAutograd: slice
-    NestedTensor: NestedTensor_slice
 
 - func: slice_backward(Tensor grad_output, int[] input_sizes, int dim, int start, int end, int step) -> Tensor
   variants: function
@@ -4167,7 +4163,6 @@
   dispatch:
     CPU, CUDA: squeeze
     QuantizedCPU, QuantizedCUDA: squeeze_quantized
-    NestedTensor: NestedTensor_squeeze
 
 - func: squeeze.dim(Tensor(a) self, int dim) -> Tensor(a)
   variants: function, method
@@ -4176,7 +4171,6 @@
   dispatch:
     CPU, CUDA: squeeze
     QuantizedCPU, QuantizedCUDA: squeeze_quantized
-    NestedTensor: NestedTensor_squeeze_dim
 
 - func: squeeze.dimname(Tensor(a) self, Dimname dim) -> Tensor(a)
   variants: function, method
@@ -4190,7 +4184,6 @@
   tags: inplace_view
   dispatch:
     CompositeExplicitAutograd: squeeze_
-    NestedTensor: NestedTensor_squeeze_
 
 - func: squeeze_.dim(Tensor(a!) self, int dim) -> Tensor(a!)
   variants: method
@@ -4199,7 +4192,6 @@
   tags: inplace_view
   dispatch:
     CompositeExplicitAutograd: squeeze_
-    NestedTensor: NestedTensor_squeeze__dim
 
 - func: squeeze_.dimname(Tensor(a!) self, Dimname dim) -> Tensor(a!)
   variants: method
@@ -4704,7 +4696,6 @@
     CPU, CUDA: unsqueeze
     SparseCPU, SparseCUDA: unsqueeze_sparse
     QuantizedCPU, QuantizedCUDA: unsqueeze_quantized
-    NestedTensor: NestedTensor_unsqueeze
 
 - func: unsqueeze_(Tensor(a!) self, int dim) -> Tensor(a!)
   variants: method
@@ -11256,13 +11247,6 @@
 
 - func: is_nt_impl(Tensor nt) -> bool
   variants: function
-  dispatch:
-    NestedTensor: NestedTensor_is_nt_impl
-
-- func: nested_tensor_contiguous(Tensor self) -> Tensor
-  variants: function
-  dispatch:
-    NestedTensor: NestedTensor_contiguous
 
 - func: nested_tensor_size_int(Tensor self, int d) -> int
   variants: function
