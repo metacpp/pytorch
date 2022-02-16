@@ -11256,6 +11256,8 @@
 
 - func: is_nt_impl(Tensor nt) -> bool
   variants: function
+  dispatch:
+    NestedTensor: NestedTensor_is_nt_impl
 
 - func: nested_tensor_contiguous(Tensor self) -> Tensor
   variants: function
@@ -11266,3 +11268,8 @@
   variants: function
   dispatch:
     NestedTensor: NestedTensor_size_int
+
+- func: nested_tensor_min_mha(int num_heads, int head_dim, float dropout_p, bool training, Tensor query, Tensor key, Tensor value, Tensor attr_kernel, Tensor attr_bias, float scaling, Tensor out_proj_weight, Tensor out_proj_bias) -> Tensor
+  variants: function
+  dispatch:
+    NestedTensor: NestedTensor_min_mha

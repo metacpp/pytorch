@@ -447,6 +447,10 @@ bool is_nt_impl(const Tensor& tensor) {
   return is_nested_tensor_impl(tensor);
 }
 
+bool NestedTensor_is_nt_impl(const Tensor& tensor) {
+  return true;
+}
+
 }
 
 // TORCH_LIBRARY_IMPL(aten, NestedTensor, m) {
