@@ -212,6 +212,7 @@ if(USE_CUDA)
     ${native_quantized_cuda_cpp}
     ${native_quantized_cudnn_cpp}
     ${native_sparse_cuda_cpp}
+    ${nestedtensor_cpp}
   )
   if(CAFFE2_USE_CUDNN)
     list(APPEND ATen_CUDA_CPP_SRCS ${cudnn_cpp})

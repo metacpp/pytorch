@@ -1,6 +1,7 @@
 #include <ATen/ATen.h>
 #include <ATen/cuda/CUDABlas.h>
 #include <ATen/cuda/CUDAContext.h>
+#include <ATen/native/nestedtensor/nested_tensor_impl.h>
 
 namespace at {
 namespace native {
@@ -18,7 +19,9 @@ at::Tensor NestedTensor_min_mha(
     double scaling,
     const at::Tensor& out_proj_weight,
     const at::Tensor& out_proj_bias) {
-  return query;
+  auto buffer = get_buffer(query);
+  buffer = buffer * 2;
+  return wrap_buffer(std::move(buffer), get_efficient_nested_size(query));
 //   // TODO: Assert that max seq_len is 1024!
 //   TORCH_CHECK(get_dim(query) == 3, "query needs to be 3 dim.");
 //   TORCH_CHECK(get_dim(key) == 3, "key needs to be 3 dim.");

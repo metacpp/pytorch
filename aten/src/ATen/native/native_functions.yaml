@@ -11247,6 +11247,8 @@
 
 - func: is_nt_impl(Tensor nt) -> bool
   variants: function
+  dispatch:
+    CPU, CUDA, NestedTensor: is_nt_impl
 
 - func: nested_tensor_size_int(Tensor self, int d) -> int
   variants: function
