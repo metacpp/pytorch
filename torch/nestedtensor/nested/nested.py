@@ -49,9 +49,9 @@ def nt_multi_head_attention_forward(query,
     assert static_k is None
     assert static_v is None
     assert not add_zero_attn
+    # Passed by nn.MHA, but really we don't return it.
     # assert not need_weights
 
-    # bsz, tgt_len, embed_dim = query.size()
     embed_dim = query.size(2)
     assert embed_dim == embed_dim_to_check
 
@@ -178,9 +178,7 @@ class NestedTensor(metaclass=NestedTensorMeta):
         return "nested_tensor(" + _str(self) + ")"
 
     def __torch_function__(self, func, types, args=(), kwargs=None):
-        print("HEE: func", func)
         if func is torch.nn.functional.multi_head_attention_forward:
             return _wrap_result(nt_multi_head_attention_forward(*args, **kwargs))
         impl_args, impl_kwargs = _filter_impl(args, kwargs)
         return _wrap_result(func(*impl_args, **impl_kwargs))
-

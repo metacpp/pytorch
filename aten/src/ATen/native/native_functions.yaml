@@ -5676,8 +5676,6 @@
   variants: method
   device_check: NoCheck
   device_guard: False
-  #  dispatch:
-  #    NestedTensor: NestedTensor_to_dtype_layout
 
 - func: to.device(Tensor(a) self, Device device, ScalarType dtype, bool non_blocking=False, bool copy=False, MemoryFormat? memory_format=None) -> Tensor(a)
   variants: method

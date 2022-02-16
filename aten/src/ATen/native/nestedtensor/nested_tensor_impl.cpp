@@ -4,8 +4,6 @@
 #include <ATen/core/op_registration/op_registration.h>
 #include <ATen/native/nestedtensor/nested_tensor_impl.h>
 #include <ATen/native/nestedtensor/nested_node_functions.h>
-// #include <torch/csrc/jit/runtime/operator.h>
-// #include <torch/library.h>
 #include <c10/core/DispatchKey.h>
 
 namespace at {
@@ -183,20 +181,4 @@ bool is_nt_impl(const Tensor& tensor) {
 }
 
 }
-
-// TORCH_LIBRARY_IMPL(aten, NestedTensor, m) {
-// //0  nt_impl(m, "contiguous", NestedTensor_contiguous);
-//   // nt_impl(m, "copy_", NestedTensor_copy_);
-//   // nt_impl(m, "is_pinned", NestedTensor_is_pinned);
-//   // nt_impl(m, "select.int", NestedTensor_select);
-// //0  nt_impl(m, "size.int", NestedTensor_size_int);
-//   // nt_impl(m, "slice.Tensor", NestedTensor_slice);
-//   // nt_impl(m, "squeeze", NestedTensor_squeeze);
-//   // nt_impl(m, "squeeze.dim", NestedTensor_squeeze_dim);
-//   // nt_impl(m, "squeeze_", NestedTensor_squeeze_);
-//   // nt_impl(m, "squeeze_.dim", NestedTensor_squeeze__dim);
-//   // nt_impl(m, "unbind.int", NestedTensor_unbind);
-//   // nt_impl(m, "unsqueeze", NestedTensor_unsqueeze);
-//   // nt_impl(m, "to.dtype_layout", NestedTensor_to_dtype_layout);
-// }
-} // namespace at
+}
