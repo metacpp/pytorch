@@ -12,19 +12,19 @@ namespace native {
 using namespace torch::nested_tensor;
 using namespace c10;
 
-TensorNode _unbind_tensors(TensorNode structure) {
-  std::vector<TensorNode> result_nodes;
-  if (structure.is_leaf()) {
-    for (at::Tensor tensor : structure.payload().unbind()) {
-      result_nodes.emplace_back(TensorNode(std::move(tensor)));
-    }
-  } else {
-    for (TensorNode child : structure.unbind()) {
-      result_nodes.emplace_back(_unbind_tensors(child));
-    }
-  }
-  return TensorNode(std::move(result_nodes));
-}
+// TensorNode _unbind_tensors(TensorNode structure) {
+//   std::vector<TensorNode> result_nodes;
+//   if (structure.is_leaf()) {
+//     for (at::Tensor tensor : structure.payload().unbind()) {
+//       result_nodes.emplace_back(TensorNode(std::move(tensor)));
+//     }
+//   } else {
+//     for (TensorNode child : structure.unbind()) {
+//       result_nodes.emplace_back(_unbind_tensors(child));
+//     }
+//   }
+//   return TensorNode(std::move(result_nodes));
+// }
 
 NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
        EfficientSizeNode nested_size,
@@ -55,29 +55,29 @@ NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
                      nested_size,
                      torch::nested_tensor::impl::_cont_stride(nested_size)) {}
 
-NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
-       SizeNode nested_size,
-       SizeNode nested_stride)
-  : NestedTensorImpl(std::move(buffer),
-                     EfficientSizeNode(nested_size),
-                     EfficientSizeNode(nested_stride)) {}
+// NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
+//        SizeNode nested_size,
+//        SizeNode nested_stride)
+//   : NestedTensorImpl(std::move(buffer),
+//                      EfficientSizeNode(nested_size),
+//                      EfficientSizeNode(nested_stride)) {}
+// 
+// NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
+//        SizeNode nested_size)
+//   : NestedTensorImpl(std::move(buffer),
+//                      EfficientSizeNode(nested_size)) {}
+// 
+// NestedTensorImpl::NestedTensorImpl(TensorNode structure)
+//   : NestedTensorImpl(
+//              torch::nested_tensor::impl::pack(structure),
+//              EfficientSizeNode(
+//                map([](at::Tensor tensor) { return tensor.sizes().vec(); },
+//                  structure))) {}
 
-NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
-       SizeNode nested_size)
-  : NestedTensorImpl(std::move(buffer),
-                     EfficientSizeNode(nested_size)) {}
 
-NestedTensorImpl::NestedTensorImpl(TensorNode structure)
-  : NestedTensorImpl(
-             torch::nested_tensor::impl::pack(structure),
-             EfficientSizeNode(
-               map([](at::Tensor tensor) { return tensor.sizes().vec(); },
-                 structure))) {}
-
-
-inline TensorNode _squeeze_nested_dim(TensorNode structure, int64_t dim) {
-  return squeeze(structure, dim, false);
-}
+// inline TensorNode _squeeze_nested_dim(TensorNode structure, int64_t dim) {
+//   return squeeze(structure, dim, false);
+// }
 
 int64_t NestedTensor_size_int(const Tensor& self, int64_t dim) {
   std::vector<c10::optional<int64_t>> size =
@@ -96,29 +96,29 @@ int64_t nt_size(Tensor tensor, int64_t dim) {
       "NestedTensor size at dim is not Tensor shape compliant.");
 }
 
-at::Tensor wrap_tensor_node(TensorNode&& result) {
-  if (result.is_leaf()) {
-    return result.payload();
-  }
-  return at::detail::make_tensor<NestedTensorImpl>(result);
-}
+// at::Tensor wrap_tensor_node(TensorNode&& result) {
+//   if (result.is_leaf()) {
+//     return result.payload();
+//   }
+//   return at::detail::make_tensor<NestedTensorImpl>(result);
+// }
+// 
+// std::vector<at::Tensor> wrap_tensor_node(std::vector<TensorNode> input) {
+//   std::vector<at::Tensor> result;
+//   for (size_t i = 0; i < input.size(); i++) {
+//     result.push_back(wrap_tensor_node(std::move(input[i])));
+//   }
+//   return result;
+// }
 
-std::vector<at::Tensor> wrap_tensor_node(std::vector<TensorNode> input) {
-  std::vector<at::Tensor> result;
-  for (size_t i = 0; i < input.size(); i++) {
-    result.push_back(wrap_tensor_node(std::move(input[i])));
-  }
-  return result;
-}
-
-at::Tensor wrap_buffer(at::Tensor&& buffer, SizeNode nested_size) {
-  TORCH_CHECK(buffer.is_contiguous(), "Given buffer must be contiguous.");
-  if (nested_size.is_leaf()) {
-    return buffer.reshape(IntArrayRef(nested_size.payload()));
-  }
-  return at::detail::make_tensor<NestedTensorImpl>(
-      std::move(buffer), nested_size);
-}
+// at::Tensor wrap_buffer(at::Tensor&& buffer, SizeNode nested_size) {
+//   TORCH_CHECK(buffer.is_contiguous(), "Given buffer must be contiguous.");
+//   if (nested_size.is_leaf()) {
+//     return buffer.reshape(IntArrayRef(nested_size.payload()));
+//   }
+//   return at::detail::make_tensor<NestedTensorImpl>(
+//       std::move(buffer), nested_size);
+// }
 
 at::Tensor wrap_buffer(
     at::Tensor&& buffer,
@@ -152,28 +152,23 @@ at::Tensor wrap_buffer(
 std::vector<at::Tensor> NestedTensor_unbind(
     const at::Tensor& self,
     int64_t dim) {
-  auto _data = get_nested_tensor_impl(self);
-  dim = at::maybe_wrap_dim(dim, get_dim(self));
-  auto node = _data->get_structure();
-  if (dim == 0) {
-    return wrap_tensor_node(node.unbind());
+  auto esizes = get_efficient_nested_size(self).sizes();
+  auto buffer = get_buffer(self);
+  auto esizes_chunks = esizes.unbind(0);
+  std::vector<int64_t> splits;
+  for (int64_t i = 0; i < esizes_chunks.size(); i++) {
+    splits.push_back(esizes_chunks[i].prod().item<int64_t>());
   }
-  std::vector<std::vector<TensorNode>> unbound;
-  for (auto child : node.unbind()) {
-    std::vector<at::Tensor> tmp =
-        at::unbind(wrap_tensor_node(std::move(child)), dim - 1);
-    for (size_t j = 0; j < tmp.size(); j++) {
-      if (j >= unbound.size()) {
-        unbound.resize(j + 1);
-      }
-      unbound[j].push_back(TensorNode(std::move(tmp[j])));
-    }
+  // TODO: This will fail if one of the Tensors has numel 0.
+  auto buffer_chunks = at::split_with_sizes(buffer, IntArrayRef(splits));
+  std::vector<at::Tensor> result_tensors;
+  for (int64_t i = 0; i < buffer_chunks.size(); i++) {
+    auto esize_chunk = esizes_chunks[i];
+    std::vector<int64_t> esize_vector(esize_chunk.data_ptr<int64_t>(),
+                                      esize_chunk.data_ptr<int64_t>() + esize_chunk.numel());
+    result_tensors.push_back(buffer_chunks[i].view(IntArrayRef(esize_vector)));
   }
-  std::vector<TensorNode> result;
-  for (size_t i = 0; i < unbound.size(); i++) {
-    result.push_back(TensorNode(std::move(unbound[i])));
-  }
-  return wrap_tensor_node(result);
+  return result_tensors;
 }
 
 bool is_nt_impl(const Tensor& tensor) {

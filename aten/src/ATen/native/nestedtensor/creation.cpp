@@ -8,21 +8,22 @@ at::Tensor nested_tensor_constructor(
     at::TensorList list,
     at::ScalarType dtype,
     at::Device device,
-    // bool requires_grad,
     bool pin_memory,
     bool channels_last) {
-  std::vector<torch::nested_tensor::TensorNode> list_nodes;
+  std::vector<Tensor> sizes;
+  std::vector<Tensor> flat_tensors;
   for (size_t i = 0; i < list.size(); i++) {
-    at::Tensor tmp_tensor = list[i];
-    list_nodes.push_back(torch::nested_tensor::TensorNode(std::move(tmp_tensor)));
+    flat_tensors.push_back(list[i].reshape(-1).contiguous());
+    sizes.push_back(at::tensor(c10::IntArrayRef(list[i].sizes())));
   }
-  Tensor result = wrap_tensor_node(torch::nested_tensor::TensorNode(std::move(list_nodes)));
-  Tensor buffer = get_buffer(result);
+  Tensor buffer = at::cat(at::TensorList(flat_tensors));
   buffer = buffer.to(device, dtype);
   if (pin_memory) {
     buffer = buffer.pin_memory();
   }
-  return wrap_buffer(std::move(buffer), get_efficient_nested_size(result));
+  return wrap_buffer(std::move(buffer),
+                     EfficientSizeNode(list.size(),
+                                       at::stack(at::TensorList(sizes))));
 }
 
 }

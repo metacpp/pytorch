@@ -5,24 +5,6 @@ namespace torch {
 namespace nested_tensor {
 
 namespace impl {
-inline at::Tensor stack_sizes(SizeNode size_node) {
-  TORCH_CHECK(size_node.height() == 1, "stack_sizes: Expected height equals 1.");
-  if (size_node.degree() == 0) {
-    return at::zeros({}, at::kLong);
-  }
-  std::vector<SizeNode> unbound_size_node = size_node.unbind();
-  std::vector<int64_t> result_sizes_vector;
-  for(int64_t i = 0; i < unbound_size_node.size(); i++) {
-    std::vector<int64_t> sizes = unbound_size_node[i].payload();
-    if(i == 0) {
-      result_sizes_vector.reserve(size_node.degree() * sizes.size());
-    }
-    for (size_t j = 0; j < sizes.size(); j++) {
-      result_sizes_vector.push_back(sizes[j]);
-    }
-  }
-  return at::tensor(c10::IntArrayRef(result_sizes_vector), at::kLong).reshape({static_cast<int64_t>(size_node.degree()), -1});
-}
 
 inline std::vector<c10::optional<int64_t>> construct_efficient_size(
     int64_t out,
@@ -51,11 +33,6 @@ inline std::vector<c10::optional<int64_t>> construct_efficient_size(
 } // namespace impl
 
 struct EfficientSizeNode {
-  explicit EfficientSizeNode(const SizeNode& size_node)
-      : _structure(size_node.degree()),
-        _sizes(impl::stack_sizes(size_node)),
-        _opt_sizes(impl::construct_efficient_size(_structure, _sizes))
-  {}
 
   explicit EfficientSizeNode(
       int64_t structure,
@@ -65,24 +42,6 @@ struct EfficientSizeNode {
         _opt_sizes(impl::construct_efficient_size(_structure, _sizes))
   {}
 
-  SizeNode to_size_node() const {
-    std::vector<std::vector<int64_t>> _tmp_sizes;
-    if (_sizes.dim() > 0) {
-      _tmp_sizes.resize(_sizes.size(0));
-      int64_t* _sizes_ptr = _sizes.data_ptr<int64_t>();
-      for (int64_t i = 0; i < _sizes.size(0); i++) {
-        _tmp_sizes[i].resize(_sizes.size(1));
-        for (int64_t j = 0; j < _sizes.size(1); j++) {
-          _tmp_sizes[i][j] = _sizes_ptr[i * _sizes.size(1) + j];
-        }
-      }
-    }
-    std::vector<SizeNode> _tmp_size_nodes;
-    for (int64_t i = 0; i < _structure; i++) {
-      _tmp_size_nodes.push_back(SizeNode(std::move(_tmp_sizes[i])));
-    }
-    return SizeNode(std::move(_tmp_size_nodes));
-  }
   int64_t height() const {
     return 1;
   }
