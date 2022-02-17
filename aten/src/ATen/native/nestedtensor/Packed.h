@@ -30,7 +30,8 @@ inline EfficientSizeNode _cont_stride(const EfficientSizeNode& nested_size) {
         for (int64_t i = 0; i < size; i++) {
           size_ptr[i] = cont_stride[i];
         }
-      }, nested_size);
+      },
+      nested_size);
   return nested_stride;
 }
 
@@ -96,13 +97,13 @@ inline bool storage_is_contiguous_channels_last(
     sizes[1] = sizes_sizes_ptr[i * 3 + 0];
     sizes[2] = sizes_sizes_ptr[i * 3 + 1];
     sizes[3] = sizes_sizes_ptr[i * 3 + 2];
-    strides[0] = sizes_sizes_ptr[i * 3 + 0] *
-                 sizes_sizes_ptr[i * 3 + 1] *
-                 sizes_sizes_ptr[i * 3 + 2];
+    strides[0] = sizes_sizes_ptr[i * 3 + 0] * sizes_sizes_ptr[i * 3 + 1] *
+        sizes_sizes_ptr[i * 3 + 2];
     strides[1] = strides_sizes_ptr[i * 3 + 0];
     strides[2] = strides_sizes_ptr[i * 3 + 1];
     strides[3] = strides_sizes_ptr[i * 3 + 2];
-    if (!c10::is_channels_last_strides_2d(c10::IntArrayRef(sizes), c10::IntArrayRef(strides))) {
+    if (!c10::is_channels_last_strides_2d(
+            c10::IntArrayRef(sizes), c10::IntArrayRef(strides))) {
       return false;
     }
   }

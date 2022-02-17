@@ -32,14 +32,10 @@ inline std::vector<c10::optional<int64_t>> construct_efficient_size(
 } // namespace impl
 
 struct EfficientSizeNode {
-
-  explicit EfficientSizeNode(
-      int64_t structure,
-      const at::Tensor& sizes)
+  explicit EfficientSizeNode(int64_t structure, const at::Tensor& sizes)
       : _structure(structure),
         _sizes(sizes),
-        _opt_sizes(impl::construct_efficient_size(_structure, _sizes))
-  {}
+        _opt_sizes(impl::construct_efficient_size(_structure, _sizes)) {}
 
   int64_t height() const {
     return 1;
@@ -141,12 +137,16 @@ inline EfficientSizeNode map_efficient_size(
   if (sizes0.dim() == 0) {
     return EfficientSizeNode(size_node0.structure(), sizes0);
   }
-  TORCH_CHECK(sizes0.size(0) == sizes1.size(0), "Sizes need to match in size(0).");
-  TORCH_CHECK(sizes0.size(1) == sizes1.size(1), "Sizes need to match in size(1).");
+  TORCH_CHECK(
+      sizes0.size(0) == sizes1.size(0), "Sizes need to match in size(0).");
+  TORCH_CHECK(
+      sizes0.size(1) == sizes1.size(1), "Sizes need to match in size(1).");
   int64_t* sizes_ptr0 = sizes0.data_ptr<int64_t>();
   int64_t* sizes_ptr1 = sizes1.data_ptr<int64_t>();
   for (int64_t i = 0; i < sizes0.size(0); i++) {
-    fn(sizes_ptr0 + i * sizes0.size(1), sizes_ptr1 + i * sizes1.size(1), sizes0.size(1));
+    fn(sizes_ptr0 + i * sizes0.size(1),
+       sizes_ptr1 + i * sizes1.size(1),
+       sizes0.size(1));
   }
   return EfficientSizeNode(size_node0.structure(), sizes0);
 }

@@ -11,9 +11,10 @@ namespace native {
 using namespace torch::nested_tensor;
 using namespace c10;
 
-NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
-       EfficientSizeNode nested_size,
-       EfficientSizeNode nested_stride)
+NestedTensorImpl::NestedTensorImpl(
+    at::Tensor&& buffer,
+    EfficientSizeNode nested_size,
+    EfficientSizeNode nested_stride)
     : TensorImpl(
           c10::DispatchKeySet({NestedTensorKey}),
           buffer.dtype(),
@@ -26,19 +27,23 @@ NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
           _buffer,
           _nested_size,
           _nested_stride)),
-      _is_contiguous_channels_last(torch::nested_tensor::impl::storage_is_contiguous_channels_last(
-          _buffer,
-          _nested_size,
-          _nested_stride)) {
+      _is_contiguous_channels_last(
+          torch::nested_tensor::impl::storage_is_contiguous_channels_last(
+              _buffer,
+              _nested_size,
+              _nested_stride)) {
   remove_autograd_key();
-  key_set_ = key_set_ - c10::DispatchKeySet({c10::DispatchKey::ADInplaceOrView});
+  key_set_ =
+      key_set_ - c10::DispatchKeySet({c10::DispatchKey::ADInplaceOrView});
 }
 
-NestedTensorImpl::NestedTensorImpl(at::Tensor&& buffer,
-       EfficientSizeNode nested_size)
-  : NestedTensorImpl(std::move(buffer),
-                     nested_size,
-                     torch::nested_tensor::impl::_cont_stride(nested_size)) {}
+NestedTensorImpl::NestedTensorImpl(
+    at::Tensor&& buffer,
+    EfficientSizeNode nested_size)
+    : NestedTensorImpl(
+          std::move(buffer),
+          nested_size,
+          torch::nested_tensor::impl::_cont_stride(nested_size)) {}
 
 int64_t NestedTensor_size_int(const Tensor& self, int64_t dim) {
   std::vector<c10::optional<int64_t>> size =
@@ -69,9 +74,7 @@ at::Tensor wrap_buffer(
       efficient_nested_stride.height() > 0,
       "Internal error: expected nested_size of non-zero height.");
   return at::detail::make_tensor<NestedTensorImpl>(
-      std::move(buffer),
-      efficient_nested_size,
-      efficient_nested_stride);
+      std::move(buffer), efficient_nested_size, efficient_nested_stride);
 }
 
 at::Tensor wrap_buffer(
@@ -82,8 +85,7 @@ at::Tensor wrap_buffer(
       efficient_nested_size.height() > 0,
       "Internal error: expected nested_size of non-zero height.");
   return at::detail::make_tensor<NestedTensorImpl>(
-      std::move(buffer),
-      efficient_nested_size);
+      std::move(buffer), efficient_nested_size);
 }
 
 std::vector<at::Tensor> NestedTensor_unbind(
@@ -101,8 +103,9 @@ std::vector<at::Tensor> NestedTensor_unbind(
   std::vector<at::Tensor> result_tensors;
   for (int64_t i = 0; i < buffer_chunks.size(); i++) {
     auto esize_chunk = esizes_chunks[i];
-    std::vector<int64_t> esize_vector(esize_chunk.data_ptr<int64_t>(),
-                                      esize_chunk.data_ptr<int64_t>() + esize_chunk.numel());
+    std::vector<int64_t> esize_vector(
+        esize_chunk.data_ptr<int64_t>(),
+        esize_chunk.data_ptr<int64_t>() + esize_chunk.numel());
     result_tensors.push_back(buffer_chunks[i].view(IntArrayRef(esize_vector)));
   }
   return result_tensors;
@@ -112,5 +115,5 @@ bool is_nt_impl(const Tensor& tensor) {
   return is_nested_tensor_impl(tensor);
 }
 
-}
-}
+} // namespace native
+} // namespace at

@@ -1,8 +1,8 @@
 #pragma once
 #include <ATen/ATen.h>
 #include <ATen/MemoryOverlap.h>
-#include <c10/util/Metaprogramming.h>
 #include <ATen/native/nestedtensor/Packed.h>
+#include <c10/util/Metaprogramming.h>
 
 namespace at {
 namespace native {
@@ -15,7 +15,8 @@ struct NestedTensorImpl;
 
 template <class A>
 bool is_nested_tensor_impl(A tensor) {
-  return tensor.unsafeGetTensorImpl()->key_set().has(c10::DispatchKey::NestedTensor);
+  return tensor.unsafeGetTensorImpl()->key_set().has(
+      c10::DispatchKey::NestedTensor);
 }
 
 template <class A, class B>
@@ -30,7 +31,10 @@ bool is_nested_tensor_impl(A first, B second, C... other) {
 }
 
 struct NestedTensorImpl : public c10::TensorImpl {
-  explicit NestedTensorImpl(at::Tensor&& buffer, EfficientSizeNode nested_size, EfficientSizeNode nested_stride);
+  explicit NestedTensorImpl(
+      at::Tensor&& buffer,
+      EfficientSizeNode nested_size,
+      EfficientSizeNode nested_stride);
   explicit NestedTensorImpl(at::Tensor&& buffer, EfficientSizeNode nested_size);
 
   int64_t dim() const override {
@@ -103,7 +107,8 @@ struct NestedTensorImpl : public c10::TensorImpl {
     if (memory_format == at::MemoryFormat::ChannelsLast) {
       return _is_contiguous_channels_last;
     }
-    TORCH_CHECK(false, "is_contiguous does not support memory format ", memory_format);
+    TORCH_CHECK(
+        false, "is_contiguous does not support memory format ", memory_format);
     return false;
   }
 
@@ -126,11 +131,13 @@ Tensor NestedTensor_to_nested_tensor(
     at::Tensor input,
     c10::optional<int64_t> dim__);
 
-inline at::native::NestedTensorImpl* get_nested_tensor_impl(const at::Tensor tensor) {
+inline at::native::NestedTensorImpl* get_nested_tensor_impl(
+    const at::Tensor tensor) {
   if (!is_nested_tensor_impl(tensor)) {
     throw std::runtime_error("Function requires NestedTensorImpl");
   }
-  return static_cast<at::native::NestedTensorImpl*>(tensor.unsafeGetTensorImpl());
+  return static_cast<at::native::NestedTensorImpl*>(
+      tensor.unsafeGetTensorImpl());
 }
 
 inline at::Tensor get_buffer(const at::Tensor& tensor) {
@@ -144,13 +151,15 @@ inline const std::vector<c10::optional<int64_t>> get_opt_sizes(
   return get_nested_tensor_impl(tensor)->opt_sizes();
 }
 
-inline const EfficientSizeNode get_efficient_nested_size(const at::Tensor& tensor) {
+inline const EfficientSizeNode get_efficient_nested_size(
+    const at::Tensor& tensor) {
   TORCH_CHECK(
       is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
   return get_nested_tensor_impl(tensor)->get_nested_size();
 }
 
-inline const EfficientSizeNode get_efficient_nested_stride(const at::Tensor& tensor) {
+inline const EfficientSizeNode get_efficient_nested_stride(
+    const at::Tensor& tensor) {
   TORCH_CHECK(
       is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
   return get_nested_tensor_impl(tensor)->get_nested_stride();
@@ -203,9 +212,7 @@ at::Tensor wrap_buffer(
     at::Tensor&&,
     EfficientSizeNode efficient_nested_size,
     EfficientSizeNode efficient_nested_stride);
-at::Tensor wrap_buffer(
-    at::Tensor&&,
-    EfficientSizeNode efficient_nested_size);
+at::Tensor wrap_buffer(at::Tensor&&, EfficientSizeNode efficient_nested_size);
 
 inline bool is_tensor_shape(const at::Tensor tensor) {
   auto nt = get_nested_tensor_impl(tensor);
@@ -217,5 +224,5 @@ inline bool is_tensor_shape(const at::Tensor tensor) {
   return true;
 }
 
+} // namespace native
 } // namespace at
-}

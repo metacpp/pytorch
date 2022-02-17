@@ -20,10 +20,10 @@ at::Tensor nested_tensor_constructor(
   if (pin_memory) {
     buffer = buffer.pin_memory();
   }
-  return wrap_buffer(std::move(buffer),
-                     EfficientSizeNode(list.size(),
-                                       at::stack(at::TensorList(sizes))));
+  return wrap_buffer(
+      std::move(buffer),
+      EfficientSizeNode(list.size(), at::stack(at::TensorList(sizes))));
 }
 
-}
-}
+} // namespace native
+} // namespace at
