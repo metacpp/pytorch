@@ -1,76 +1,5 @@
 import torch
 import numbers
-# from . import masking
-# 
-# from . import creation
-# 
-# import nestedtensor
-# import warnings
-
-def nt_multi_head_attention_forward(query,
-                                 key,
-                                 value,
-                                 embed_dim_to_check,
-                                 num_heads,
-                                 in_proj_weight,
-                                 in_proj_bias,
-                                 bias_k,
-                                 bias_v,
-                                 add_zero_attn,
-                                 dropout_p,
-                                 out_proj_weight,
-                                 out_proj_bias,
-                                 training=True,
-                                 key_padding_mask=None,
-                                 need_weights=True,
-                                 attn_mask=None,
-                                 use_separate_proj_weight=False,
-                                 q_proj_weight=None,
-                                 k_proj_weight=None,
-                                 v_proj_weight=None,
-                                 static_k=None,
-                                 static_v=None
-                                 ):
-    assert isinstance(query, torch.NestedTensor)
-    assert isinstance(key, torch.NestedTensor)
-    assert isinstance(value, torch.NestedTensor)
-    assert torch.is_tensor(out_proj_weight)
-    assert torch.is_tensor(out_proj_bias)
-    # Self-attention only
-    # CUDA only
-    assert query is key and key is value and in_proj_weight.is_cuda
-
-    # TODO: Explicitly unsupported flags
-    assert not use_separate_proj_weight
-    assert attn_mask is None
-    assert key_padding_mask is None
-    assert bias_k is None
-    assert bias_v is None
-    assert static_k is None
-    assert static_v is None
-    assert not add_zero_attn
-    # Passed by nn.MHA, but really we don't return it.
-    # assert not need_weights
-
-    embed_dim = query.size(2)
-    assert embed_dim == embed_dim_to_check
-
-    head_dim = embed_dim // num_heads
-    assert head_dim * num_heads == embed_dim, "embed_dim must be divisible by num_heads"
-    scaling = float(head_dim) ** -0.5
-
-    return torch.nested_tensor_min_mha(num_heads,
-                                             head_dim,
-                                             0.5,
-                                             False,
-                                             query,
-                                             query,
-                                             query,
-                                             in_proj_weight,
-                                             in_proj_bias,
-                                             scaling,
-                                             out_proj_weight,
-                                             in_proj_bias), None
 
 def _filter_impl(args, kwargs):
     if kwargs is None:
@@ -119,22 +48,7 @@ class NestedTensorMeta(type):
 
 
 class NestedTensor(metaclass=NestedTensorMeta):
-    # The attributes must match across all constiuents
-    #
-    # The NestedTensor's attributes then become that of its
-    # constiuents.
-    #
-    # data must be a list of Tensors or NestedTensors
-    #
-    # Attributes:
-    #     dim()
-    #     layout
-    #     device
-    #     dtype
-    #     requires_grad
-    #     is_pinned()
-    # Neighbors may share data, maybe all share data.
-    # Levels of contiguity
+    # data is a torch.Tensor backed by a NestedTensorImpl
 
     def __init__(self, impl):
         self._impl = impl
