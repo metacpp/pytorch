@@ -91,6 +91,9 @@ at::Tensor wrap_buffer(
 std::vector<at::Tensor> NestedTensor_unbind(
     const at::Tensor& self,
     int64_t dim) {
+  TORCH_CHECK(dim == 0, 
+      "NestedTensor can only be unbound along dimension 0 ",
+      "got dimension ", dim, " instead.");
   auto esizes = get_efficient_nested_size(self).sizes();
   auto buffer = get_buffer(self);
   auto esizes_chunks = esizes.unbind(0);

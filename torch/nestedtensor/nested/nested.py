@@ -62,6 +62,34 @@ class NestedTensor(metaclass=NestedTensorMeta):
             return _wrapped_fn
         return self.__dict__[name]
 
+    @property
+    def dtype(self):
+        """
+        The data type of ```self``` NestedTensor.
+        """
+        return self._impl.dtype
+
+    @property
+    def layout(self):
+        """
+        The layout of ```self``` NestedTensor.
+        """
+        return self._impl.layout
+
+    @property
+    def device(self):
+        """
+        The device of ```self``` NestedTensor.
+        """
+        return self._impl.device
+
+    @property
+    def requires_grad(self):
+        """
+        Is ```True``` if gradients need to be computed for this Tensor.
+        """
+        return self._impl.requires_grad
+
     def nested_dim(self):
         """
         The nested dimension of ```self``` NestedTensor.

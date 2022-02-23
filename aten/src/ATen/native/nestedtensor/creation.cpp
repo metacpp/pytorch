@@ -15,6 +15,12 @@ at::Tensor nested_tensor_constructor(
     flat_tensors.push_back(list[i].reshape(-1).contiguous());
     sizes.push_back(at::tensor(c10::IntArrayRef(list[i].sizes())));
   }
+  if (flat_tensors.size() == 0) {
+    return wrap_buffer(
+        at::ones({0}),
+        EfficientSizeNode(list.size(), at::ones({})));
+  }
+
   Tensor buffer = at::cat(at::TensorList(flat_tensors));
   buffer = buffer.to(device, dtype);
   if (pin_memory) {
