@@ -115,6 +115,26 @@ class TestNestedTensor(TestCase):
             a1 = constructor([torch.tensor([1, 2, 3, 4])])
             self.assertEqual(a1.dim(), 2)
 
+    def test_numel(self):
+        for constructor in _iter_constructors():
+            a1 = constructor([])
+            self.assertRaisesRegex(RuntimeError, "numel is disabled", lambda: a1.numel(),)
+
+    def test_size(self):
+        for constructor in _iter_constructors():
+            a1 = constructor([])
+            self.assertRaisesRegex(RuntimeError, "NestedTensorImpl doesn't support sizes", lambda: a1.size())
+
+    def test_stride(self):
+        for constructor in _iter_constructors():
+            a1 = constructor([])
+            self.assertRaisesRegex(RuntimeError, "NestedTensorImpl doesn't support strides", lambda: a1.stride())
+
+    def test_is_contiguous(self):
+        for constructor in _iter_constructors():
+            a1 = constructor([])
+            self.assertRaisesRegex(RuntimeError, "is_contiguous is disabled", lambda: a1.is_contiguous())
+
     def test_repr_string(self):
         a = nested_tensor(
             [
