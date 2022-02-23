@@ -1,6 +1,7 @@
 import torch
 import numbers
 
+
 def _filter_impl(args, kwargs):
     if kwargs is None:
         kwargs = {}
@@ -19,9 +20,11 @@ def _filter_impl(args, kwargs):
         else:
             impl_args.append(a)
     impl_kwargs = {
-        k: v._impl if isinstance(v, torch.NestedTensor) else v for (k, v) in kwargs.items()
+        k: v._impl if isinstance(v, torch.NestedTensor) else v
+        for (k, v) in kwargs.items()
     }
     return impl_args, impl_kwargs
+
 
 def _wrap_result(result):
     if isinstance(result, list):
@@ -34,17 +37,18 @@ def _wrap_result(result):
         else result
     )
 
+
 class NestedTensorMeta(type):
     def __getattr__(cls, name):
         if getattr(torch.Tensor, name):
+
             def _wrapped_fn(*args, **kwargs):
                 impl_args, impl_kwargs = _filter_impl(args, kwargs)
-                result = getattr(impl_args[0], name)(
-                    *(impl_args[1:]), **impl_kwargs)
+                result = getattr(impl_args[0], name)(*(impl_args[1:]), **impl_kwargs)
                 return _wrap_result(result)
+
             return _wrapped_fn
         return cls.__dict__[name]
-
 
 
 class NestedTensor(metaclass=NestedTensorMeta):
@@ -55,10 +59,12 @@ class NestedTensor(metaclass=NestedTensorMeta):
 
     def __getattr__(self, name):
         if hasattr(self._impl, name):
+
             def _wrapped_fn(*args, **kwargs):
                 impl_args, impl_kwargs = _filter_impl(args, kwargs)
                 result = getattr(self._impl, name)(*impl_args, **impl_kwargs)
                 return _wrap_result(result)
+
             return _wrapped_fn
         return self.__dict__[name]
 
@@ -101,13 +107,20 @@ class NestedTensor(metaclass=NestedTensorMeta):
 
     def __str__(self):
         def _str(x, indent=0, tab="  "):
-            s = indent*tab + "[\n"
+            s = indent * tab + "[\n"
             strs = list(map(str, x.unbind()))
-            strs = list(map(lambda xi: "\n".join(
-                map(lambda xij: (indent + 1)*tab + xij, xi.split("\n"))), strs))
+            strs = list(
+                map(
+                    lambda xi: "\n".join(
+                        map(lambda xij: (indent + 1) * tab + xij, xi.split("\n"))
+                    ),
+                    strs,
+                )
+            )
             s += ",\n".join(strs)
             s += "\n" + indent * tab + "]"
             return s
+
         return "nested_tensor(" + _str(self) + ")"
 
     def __repr__(self):
