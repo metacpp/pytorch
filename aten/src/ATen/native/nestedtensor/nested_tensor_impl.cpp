@@ -8,9 +8,6 @@
 namespace at {
 namespace native {
 
-using namespace torch::nested_tensor;
-using namespace c10;
-
 NestedTensorImpl::NestedTensorImpl(
     at::Tensor&& buffer,
     EfficientSizeNode nested_size)
@@ -86,6 +83,34 @@ std::vector<at::Tensor> NestedTensor_unbind(
 
 bool is_nt_impl(const Tensor& tensor) {
   return is_nested_tensor_impl(tensor);
+}
+
+at::Tensor nested_tensor_constructor(
+    at::TensorList list,
+    at::ScalarType dtype,
+    at::Device device,
+    bool pin_memory,
+    bool channels_last) {
+  std::vector<Tensor> sizes;
+  std::vector<Tensor> flat_tensors;
+  for (size_t i = 0; i < list.size(); i++) {
+    flat_tensors.push_back(list[i].reshape(-1).contiguous());
+    sizes.push_back(at::tensor(c10::IntArrayRef(list[i].sizes())));
+  }
+  if (flat_tensors.size() == 0) {
+    return wrap_buffer(
+        at::ones({0}),
+        EfficientSizeNode(list.size(), at::ones({})));
+  }
+
+  Tensor buffer = at::cat(at::TensorList(flat_tensors));
+  buffer = buffer.to(device, dtype);
+  if (pin_memory) {
+    buffer = buffer.pin_memory();
+  }
+  return wrap_buffer(
+      std::move(buffer),
+      EfficientSizeNode(list.size(), at::stack(at::TensorList(sizes))));
 }
 
 } // namespace native
