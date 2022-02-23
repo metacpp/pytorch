@@ -28,9 +28,6 @@ at::Tensor wrap_buffer(
     at::Tensor&& buffer,
     EfficientSizeNode efficient_nested_size) {
   TORCH_CHECK(buffer.is_contiguous(), "Given buffer must be contiguous.");
-  TORCH_CHECK(
-      efficient_nested_size.height() > 0,
-      "Internal error: expected nested_size of non-zero height.");
   return at::detail::make_tensor<NestedTensorImpl>(
       std::move(buffer), efficient_nested_size);
 }

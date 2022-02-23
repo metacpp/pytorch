@@ -12,15 +12,6 @@ struct EfficientSizeNode {
       : _num_entries(structure),
         _sizes(sizes) {}
 
-  int64_t height() const {
-    return 1;
-  }
-  int64_t degree() const {
-    if (_sizes.dim() == 0) {
-      return 0;
-    }
-    return _sizes.size(0);
-  }
   int64_t dim() const {
     return _sizes.dim() > 0 ? 1 + _sizes.size(1) : 1;
   }
