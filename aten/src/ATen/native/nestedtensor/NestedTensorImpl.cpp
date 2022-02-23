@@ -63,28 +63,35 @@ bool is_nt_impl(const Tensor& tensor) {
   return is_nested_tensor_impl(tensor);
 }
 
-at::Tensor nested_tensor_constructor(
-    at::TensorList list,
-    at::ScalarType dtype,
-    at::Device device,
-    bool pin_memory,
-    bool channels_last) {
+/*
+ * This result of this function cannot be used by itself. The result needs to
+ * be wrapped in torch.nested.NestedTensor.
+ */
+Tensor _nested_tensor(
+    TensorList list,
+    c10::optional<ScalarType> dtype,
+    c10::optional<Layout> layout,
+    c10::optional<Device> device,
+    c10::optional<bool> pin_memory) {
+  TensorOptions options_ =
+      TensorOptions().dtype(dtype).layout(layout).device(device).pinned_memory(
+          pin_memory);
+
   std::vector<Tensor> sizes;
   std::vector<Tensor> flat_tensors;
   for (size_t i = 0; i < list.size(); i++) {
     flat_tensors.push_back(list[i].reshape(-1).contiguous());
-    sizes.push_back(at::tensor(c10::IntArrayRef(list[i].sizes())));
+    sizes.push_back(tensor(c10::IntArrayRef(list[i].sizes())));
   }
   if (flat_tensors.size() == 0) {
-    return wrap_buffer(at::ones({0}), at::ones({}));
+    return wrap_buffer(ones({0}), ones({}));
   }
 
-  Tensor buffer = at::cat(at::TensorList(flat_tensors));
-  buffer = buffer.to(device, dtype);
-  if (pin_memory) {
-    buffer = buffer.pin_memory();
-  }
-  return wrap_buffer(std::move(buffer), at::stack(at::TensorList(sizes)));
+  TensorOptions options = flat_tensors[0].options().merge_in(options_);
+
+  return wrap_buffer(
+      at::native::cat(at::TensorList(flat_tensors)).to(options),
+      at::native::stack(at::TensorList(sizes)));
 }
 
 } // namespace native

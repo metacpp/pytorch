@@ -11237,7 +11237,7 @@
   variants: function
   python_module: nn
 
-- func: nested_tensor_constructor(Tensor[] list, ScalarType dtype, Device device, bool pin_memory, bool channels_last) -> Tensor
+- func: _nested_tensor(Tensor[] list, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor
   variants: function
 
 - func: is_nt_impl(Tensor nt) -> bool

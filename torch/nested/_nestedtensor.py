@@ -37,23 +37,15 @@ def _wrap_result(result):
         else result
     )
 
+def nested_tensor(*args, **kwargs):
+    return NestedTensor(torch._nested_tensor(*args, **kwargs))
+
 
 class NestedTensor:
     # data is a torch.Tensor backed by a NestedTensorImpl
 
     def __init__(self, impl):
         self._impl = impl
-
-    def __getattr__(self, name):
-        if hasattr(self._impl, name):
-
-            def _wrapped_fn(*args, **kwargs):
-                impl_args, impl_kwargs = _filter_impl(args, kwargs)
-                result = getattr(self._impl, name)(*impl_args, **impl_kwargs)
-                return _wrap_result(result)
-
-            return _wrapped_fn
-        return self.__dict__[name]
 
     @property
     def dtype(self):
@@ -83,15 +75,6 @@ class NestedTensor:
         """
         return self._impl.requires_grad
 
-    def nested_dim(self):
-        """
-        The nested dimension of ```self``` NestedTensor.
-        The nested dimension is defined as the level of indexing required
-        to reach a Tensor constiuent.
-        """
-        # This NT only supports nesting of 1.
-        return 1
-
     def __str__(self):
         def _str(x, indent=0, tab="  "):
             s = indent * tab + "[\n"
@@ -114,5 +97,6 @@ class NestedTensor:
         return self.__str__()
 
     def __torch_function__(self, func, types, args=(), kwargs=None):
+        print("func: ", func)
         impl_args, impl_kwargs = _filter_impl(args, kwargs)
         return _wrap_result(func(*impl_args, **impl_kwargs))
