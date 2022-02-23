@@ -84,7 +84,6 @@ struct NestedTensorImpl : public c10::TensorImpl {
  private:
   at::Tensor _buffer;
   const EfficientSizeNode _nested_size;
-  bool _is_pinned;
   const bool _is_contiguous;
 };
 
@@ -108,7 +107,6 @@ inline const EfficientSizeNode get_efficient_nested_size(
   return get_nested_tensor_impl(tensor)->get_nested_size();
 }
 
-at::Tensor wrap_tensor_node(NestedTensorImpl);
 at::Tensor wrap_buffer(
     at::Tensor&&,
     EfficientSizeNode efficient_nested_size);

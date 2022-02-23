@@ -95,8 +95,10 @@ class TestNestedTensor(TestCase):
         self.assertEqual(default_nested_tensor.requires_grad,
                          default_tensor.requires_grad)
         self.assertIsNone(default_tensor.grad)
-        self.assertEqual(default_nested_tensor.is_pinned(),
-                         default_tensor.is_pinned())
+        # TODO: Re-enable once we have a performance driven
+        # use case and implementation.
+        # self.assertEqual(default_nested_tensor.is_pinned(),
+        #                  default_tensor.is_pinned())
 
     def test_element_size(self):
         for constructor in _iter_constructors():

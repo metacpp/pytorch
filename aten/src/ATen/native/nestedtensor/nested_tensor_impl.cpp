@@ -17,7 +17,6 @@ NestedTensorImpl::NestedTensorImpl(
           buffer.device()),
       _buffer(buffer),
       _nested_size(nested_size),
-      _is_pinned(_buffer.is_pinned()),
       _is_contiguous(true) {
   remove_autograd_key();
   key_set_ =
