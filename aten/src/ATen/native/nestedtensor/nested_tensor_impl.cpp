@@ -22,9 +22,7 @@ NestedTensorImpl::NestedTensorImpl(
       key_set_ - c10::DispatchKeySet({c10::DispatchKey::ADInplaceOrView});
 }
 
-at::Tensor wrap_buffer(
-    at::Tensor buffer,
-    at::Tensor nested_size_tensor) {
+at::Tensor wrap_buffer(at::Tensor buffer, at::Tensor nested_size_tensor) {
   TORCH_CHECK(buffer.is_contiguous(), "Given buffer must be contiguous.");
   return at::detail::make_tensor<NestedTensorImpl>(
       std::move(buffer), nested_size_tensor);
@@ -33,9 +31,12 @@ at::Tensor wrap_buffer(
 std::vector<at::Tensor> NestedTensor_unbind(
     const at::Tensor& self,
     int64_t dim) {
-  TORCH_CHECK(dim == 0, 
+  TORCH_CHECK(
+      dim == 0,
       "NestedTensor can only be unbound along dimension 0 ",
-      "got dimension ", dim, " instead.");
+      "got dimension ",
+      dim,
+      " instead.");
   auto esizes = get_nested_size_tensor(self);
   auto buffer = get_buffer(self);
   std::vector<at::Tensor> result_tensors;
@@ -76,9 +77,7 @@ at::Tensor nested_tensor_constructor(
     sizes.push_back(at::tensor(c10::IntArrayRef(list[i].sizes())));
   }
   if (flat_tensors.size() == 0) {
-    return wrap_buffer(
-        at::ones({0}),
-        at::ones({}));
+    return wrap_buffer(at::ones({0}), at::ones({}));
   }
 
   Tensor buffer = at::cat(at::TensorList(flat_tensors));
@@ -86,9 +85,7 @@ at::Tensor nested_tensor_constructor(
   if (pin_memory) {
     buffer = buffer.pin_memory();
   }
-  return wrap_buffer(
-      std::move(buffer),
-      at::stack(at::TensorList(sizes)));
+  return wrap_buffer(std::move(buffer), at::stack(at::TensorList(sizes)));
 }
 
 } // namespace native
