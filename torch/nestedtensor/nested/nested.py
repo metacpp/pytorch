@@ -38,20 +38,7 @@ def _wrap_result(result):
     )
 
 
-class NestedTensorMeta(type):
-    def __getattr__(cls, name):
-        if getattr(torch.Tensor, name):
-
-            def _wrapped_fn(*args, **kwargs):
-                impl_args, impl_kwargs = _filter_impl(args, kwargs)
-                result = getattr(impl_args[0], name)(*(impl_args[1:]), **impl_kwargs)
-                return _wrap_result(result)
-
-            return _wrapped_fn
-        return cls.__dict__[name]
-
-
-class NestedTensor(metaclass=NestedTensorMeta):
+class NestedTensor:
     # data is a torch.Tensor backed by a NestedTensorImpl
 
     def __init__(self, impl):
@@ -127,7 +114,5 @@ class NestedTensor(metaclass=NestedTensorMeta):
         return self.__str__()
 
     def __torch_function__(self, func, types, args=(), kwargs=None):
-        if func is torch.nn.functional.multi_head_attention_forward:
-            return _wrap_result(nt_multi_head_attention_forward(*args, **kwargs))
         impl_args, impl_kwargs = _filter_impl(args, kwargs)
         return _wrap_result(func(*impl_args, **impl_kwargs))
