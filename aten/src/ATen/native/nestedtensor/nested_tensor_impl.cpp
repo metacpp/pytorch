@@ -96,6 +96,10 @@ std::vector<at::Tensor> NestedTensor_unbind(
       "got dimension ", dim, " instead.");
   auto esizes = get_efficient_nested_size(self).sizes();
   auto buffer = get_buffer(self);
+  std::vector<at::Tensor> result_tensors;
+  if (esizes.dim() == 0) {
+    return result_tensors;
+  }
   auto esizes_chunks = esizes.unbind(0);
   std::vector<int64_t> splits;
   for (int64_t i = 0; i < esizes_chunks.size(); i++) {
@@ -103,7 +107,6 @@ std::vector<at::Tensor> NestedTensor_unbind(
   }
   // TODO: This will fail if one of the Tensors has numel 0.
   auto buffer_chunks = at::split_with_sizes(buffer, IntArrayRef(splits));
-  std::vector<at::Tensor> result_tensors;
   for (int64_t i = 0; i < buffer_chunks.size(); i++) {
     auto esize_chunk = esizes_chunks[i];
     std::vector<int64_t> esize_vector(

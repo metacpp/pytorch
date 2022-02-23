@@ -115,38 +115,34 @@ class TestNestedTensor(TestCase):
             a1 = constructor([torch.tensor([1, 2, 3, 4])])
             self.assertEqual(a1.dim(), 2)
 
-#    def test_repr_string(self):
-#        a = constructor(
-#            [
-#            ])
-#        expected = "nested_tensor(["\
-#                   "\n\n])"
-#        self.assertEqual(str(a), expected)
-#        self.assertEqual(repr(a), expected)
-#
-#        a = constructor(
-#            [
-#                torch.tensor(1),
-#            ])
-#        expected = "nested_tensor(["\
-#                   "\n\ttensor(1)"\
-#                   "\n])"
-#        self.assertEqual(str(a), expected)
-#        self.assertEqual(repr(a), expected)
-#        # str(a)
-#        # repr(a)
-#
-#        a = constructor(
-#            [
-#                torch.tensor([[1, 2]]),
-#                torch.tensor([[4, 5]]),
-#            ])
-#        expected = "nested_tensor(["\
-#                   "\n\ttensor([[1, 2]])"\
-#                   ","\
-#                   "\n\ttensor([[4, 5]])"\
-#                   "\n])"
-#        self.assertEqual(str(a), expected)
-#        self.assertEqual(repr(a), expected)
-#        # str(a)
-#        # repr(a)
+    def test_repr_string(self):
+        a = nested_tensor(
+            [
+            ])
+        expected = "nested_tensor(["\
+                   "\n\n])"
+        self.assertEqual(str(a), expected)
+        self.assertEqual(repr(a), expected)
+
+        a = nested_tensor(
+            [
+                torch.tensor(1),
+            ])
+        expected = "nested_tensor(["\
+                   "\n  tensor(1.)"\
+                   "\n])"
+        self.assertEqual(str(a), expected)
+        self.assertEqual(repr(a), expected)
+
+        a = nested_tensor(
+            [
+                torch.tensor([[1, 2]]),
+                torch.tensor([[4, 5]]),
+            ])
+        expected = "nested_tensor(["\
+                   "\n  tensor([[1., 2.]])"\
+                   ","\
+                   "\n  tensor([[4., 5.]])"\
+                   "\n])"
+        self.assertEqual(str(a), expected)
+        self.assertEqual(repr(a), expected)
