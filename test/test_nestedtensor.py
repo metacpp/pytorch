@@ -22,14 +22,12 @@ class TestNestedTensor(TestCase):
                 self.assertTrue(a is not a1)
                 self.assertTrue(b is not b1)
 
-                nt = nested_tensor([a, b])
+                nt = nested_tensor([a, b], dtype=a.dtype)
                 a1, b1 = unbind_fn(nt, 0)
-                print("a1: ", a1)
-                print("a: ", a)
                 self.assertEqual(a, a1)
                 self.assertEqual(b, b1)
 
-                a = utils.gen_float_tensor(1, (2, 3)).add_(1)
+                a = torch.randn((2, 3)).add_(1)
                 nt = nested_tensor([a])
                 self.assertEqual(a, unbind_fn(nt, 0)[0])
 
@@ -53,7 +51,6 @@ class TestNestedTensor(TestCase):
                   torch.tensor([]),
                   torch.tensor([]),
                   torch.tensor([]))
-        return
 
         # Both of these tests are necessary, because we're using
         # torch_function.

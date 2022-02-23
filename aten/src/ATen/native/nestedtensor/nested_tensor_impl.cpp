@@ -48,7 +48,6 @@ std::vector<at::Tensor> NestedTensor_unbind(
   for (int64_t i = 0; i < esizes_chunks.size(); i++) {
     splits.push_back(esizes_chunks[i].prod().item<int64_t>());
   }
-  // TODO: This will fail if one of the Tensors has numel 0.
   auto buffer_chunks = at::split_with_sizes(buffer, IntArrayRef(splits));
   for (int64_t i = 0; i < buffer_chunks.size(); i++) {
     auto esize_chunk = esizes_chunks[i];
