@@ -12,6 +12,7 @@ def _iter_constructors():
 
 class TestNestedTensor(TestCase):
 
+    @torch.inference_mode()
     def test_unbind(self):
 
         def _test_fn(unbind_fn):
@@ -59,6 +60,7 @@ class TestNestedTensor(TestCase):
         _test_fn(lambda x, dim: x.unbind(dim))
         _test_fn(lambda x, dim: torch.unbind(x, dim))
 
+    @torch.inference_mode()
     def test_unbind_dim(self):
 
         def _test_fn(unbind_fn):
@@ -73,6 +75,7 @@ class TestNestedTensor(TestCase):
         _test_fn(lambda x, dim: x.unbind(dim))
         _test_fn(lambda x, dim: torch.unbind(x, dim))
 
+    @torch.inference_mode()
     def test_nested_tensor(self):
         self.assertRaises(
             TypeError, lambda: nested_tensor([3.0]))
@@ -80,6 +83,7 @@ class TestNestedTensor(TestCase):
             TypeError, lambda: nested_tensor(torch.tensor([3.0])))
         self.assertRaises(TypeError, lambda: nested_tensor(4.0))
 
+    @torch.inference_mode()
     def test_default_nested_tensor(self):
         self.assertRaises(TypeError, lambda: nested_tensor())
         default_nested_tensor = nested_tensor([])
@@ -100,6 +104,7 @@ class TestNestedTensor(TestCase):
         # self.assertEqual(default_nested_tensor.is_pinned(),
         #                  default_tensor.is_pinned())
 
+    @torch.inference_mode()
     def test_element_size(self):
         for constructor in _iter_constructors():
             nt1 = constructor([])
@@ -108,6 +113,7 @@ class TestNestedTensor(TestCase):
             nt2 = constructor([a])
             self.assertEqual(a.element_size(), nt2.element_size())
 
+    @torch.inference_mode()
     def test_dim(self):
         for constructor in _iter_constructors():
             a1 = constructor([])
@@ -117,26 +123,31 @@ class TestNestedTensor(TestCase):
             a1 = constructor([torch.tensor([1, 2, 3, 4])])
             self.assertEqual(a1.dim(), 2)
 
+    @torch.inference_mode()
     def test_numel(self):
         for constructor in _iter_constructors():
             a1 = constructor([])
             self.assertRaisesRegex(RuntimeError, "numel is disabled", lambda: a1.numel(),)
 
+    @torch.inference_mode()
     def test_size(self):
         for constructor in _iter_constructors():
             a1 = constructor([])
             self.assertRaisesRegex(RuntimeError, "NestedTensorImpl doesn't support sizes", lambda: a1.size())
 
+    @torch.inference_mode()
     def test_stride(self):
         for constructor in _iter_constructors():
             a1 = constructor([])
             self.assertRaisesRegex(RuntimeError, "NestedTensorImpl doesn't support strides", lambda: a1.stride())
 
+    @torch.inference_mode()
     def test_is_contiguous(self):
         for constructor in _iter_constructors():
             a1 = constructor([])
             self.assertRaisesRegex(RuntimeError, "is_contiguous is disabled", lambda: a1.is_contiguous())
 
+    @torch.inference_mode()
     def test_repr_string(self):
         a = nested_tensor(
             [

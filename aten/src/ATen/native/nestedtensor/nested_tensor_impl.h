@@ -7,23 +7,6 @@
 namespace at {
 namespace native {
 
-struct EfficientSizeNode {
-  explicit EfficientSizeNode(int64_t structure, const at::Tensor& sizes)
-      : _num_entries(structure),
-        _sizes(sizes) {}
-
-  int64_t dim() const {
-    return _sizes.dim() > 0 ? 1 + _sizes.size(1) : 1;
-  }
-  const at::Tensor& sizes() const {
-    return _sizes;
-  }
-
- private:
-  int64_t _num_entries;
-  const at::Tensor _sizes;
-};
-
 bool is_nested_tensor_impl(at::Tensor tensor) {
   return tensor.unsafeGetTensorImpl()->key_set().has(
       c10::DispatchKey::NestedTensor);
@@ -31,11 +14,11 @@ bool is_nested_tensor_impl(at::Tensor tensor) {
 
 struct NestedTensorImpl : public c10::TensorImpl {
   explicit NestedTensorImpl(
-      at::Tensor&& buffer,
-      EfficientSizeNode nested_size);
+    at::Tensor buffer,
+    at::Tensor nested_size_tensor);
 
   int64_t dim() const override {
-    return _nested_size.dim();
+    return _nested_size_tensor.dim() > 0 ? 1 + _nested_size_tensor.size(1) : 1;
   }
 
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
@@ -51,8 +34,8 @@ struct NestedTensorImpl : public c10::TensorImpl {
         "is_contiguous is disabled. These methods are not virtual in fbcode.");
   }
 #endif
-  EfficientSizeNode get_nested_size() {
-    return _nested_size;
+  Tensor get_nested_size_tensor() {
+    return _nested_size_tensor;
   }
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
   IntArrayRef sizes() const override {
@@ -83,8 +66,7 @@ struct NestedTensorImpl : public c10::TensorImpl {
 
  private:
   at::Tensor _buffer;
-  const EfficientSizeNode _nested_size;
-  const bool _is_contiguous;
+  const at::Tensor _nested_size_tensor;
 };
 
 inline at::native::NestedTensorImpl* get_nested_tensor_impl(
@@ -100,16 +82,16 @@ inline at::Tensor get_buffer(const at::Tensor& tensor) {
   return get_nested_tensor_impl(tensor)->get_buffer();
 }
 
-inline const EfficientSizeNode get_efficient_nested_size(
+inline const at::Tensor get_nested_size_tensor(
     const at::Tensor& tensor) {
   TORCH_CHECK(
       is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
-  return get_nested_tensor_impl(tensor)->get_nested_size();
+  return get_nested_tensor_impl(tensor)->get_nested_size_tensor();
 }
 
 at::Tensor wrap_buffer(
-    at::Tensor&&,
-    EfficientSizeNode efficient_nested_size);
+    at::Tensor,
+    at::Tensor nested_size_tensor);
 
 } // namespace native
 } // namespace at
