@@ -1,8 +1,9 @@
 #pragma once
 #include <ATen/ATen.h>
 #include <ATen/MemoryOverlap.h>
-#include <ATen/native/nestedtensor/Packed.h>
 #include <c10/util/Metaprogramming.h>
+#include <ATen/native/nestedtensor/EfficientSizeNode.h>
+#include <c10/core/MemoryFormat.h>
 
 namespace at {
 namespace native {
