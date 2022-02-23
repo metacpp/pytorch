@@ -33,9 +33,7 @@ bool is_nested_tensor_impl(A first, B second, C... other) {
 struct NestedTensorImpl : public c10::TensorImpl {
   explicit NestedTensorImpl(
       at::Tensor&& buffer,
-      EfficientSizeNode nested_size,
-      EfficientSizeNode nested_stride);
-  explicit NestedTensorImpl(at::Tensor&& buffer, EfficientSizeNode nested_size);
+      EfficientSizeNode nested_size);
 
   int64_t dim() const override {
     return _nested_size.dim();
@@ -57,9 +55,9 @@ struct NestedTensorImpl : public c10::TensorImpl {
   EfficientSizeNode get_nested_size() {
     return _nested_size;
   }
-  EfficientSizeNode get_nested_stride() {
-    return _nested_stride;
-  }
+//   EfficientSizeNode get_nested_stride() {
+//     return _nested_stride;
+//   }
   int64_t nested_dim() const {
     return _nested_size.height();
   }
@@ -104,9 +102,6 @@ struct NestedTensorImpl : public c10::TensorImpl {
     if (memory_format == at::MemoryFormat::Contiguous) {
       return _is_contiguous;
     }
-    if (memory_format == at::MemoryFormat::ChannelsLast) {
-      return _is_contiguous_channels_last;
-    }
     TORCH_CHECK(
         false, "is_contiguous does not support memory format ", memory_format);
     return false;
@@ -119,10 +114,8 @@ struct NestedTensorImpl : public c10::TensorImpl {
  private:
   at::Tensor _buffer;
   const EfficientSizeNode _nested_size;
-  const EfficientSizeNode _nested_stride;
   bool _is_pinned;
   const bool _is_contiguous;
-  const bool _is_contiguous_channels_last;
 };
 
 int64_t nt_size(Tensor tensor, int64_t dim);
@@ -158,12 +151,12 @@ inline const EfficientSizeNode get_efficient_nested_size(
   return get_nested_tensor_impl(tensor)->get_nested_size();
 }
 
-inline const EfficientSizeNode get_efficient_nested_stride(
-    const at::Tensor& tensor) {
-  TORCH_CHECK(
-      is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
-  return get_nested_tensor_impl(tensor)->get_nested_stride();
-}
+// inline const EfficientSizeNode get_efficient_nested_stride(
+//     const at::Tensor& tensor) {
+//   TORCH_CHECK(
+//       is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
+//   return get_nested_tensor_impl(tensor)->get_nested_stride();
+// }
 
 inline int64_t get_dim(const at::Tensor& tensor) {
   if (is_nested_tensor_impl(tensor)) {
@@ -210,8 +203,8 @@ inline int64_t get_nested_dim(const at::Tensor& tensor) {
 at::Tensor wrap_tensor_node(NestedTensorImpl);
 at::Tensor wrap_buffer(
     at::Tensor&&,
-    EfficientSizeNode efficient_nested_size,
-    EfficientSizeNode efficient_nested_stride);
+    EfficientSizeNode efficient_nested_size);
+//    EfficientSizeNode efficient_nested_stride);
 at::Tensor wrap_buffer(at::Tensor&&, EfficientSizeNode efficient_nested_size);
 
 inline bool is_tensor_shape(const at::Tensor tensor) {

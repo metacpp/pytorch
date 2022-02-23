@@ -13,37 +13,19 @@ using namespace c10;
 
 NestedTensorImpl::NestedTensorImpl(
     at::Tensor&& buffer,
-    EfficientSizeNode nested_size,
-    EfficientSizeNode nested_stride)
+    EfficientSizeNode nested_size)
     : TensorImpl(
           c10::DispatchKeySet({NestedTensorKey}),
           buffer.dtype(),
           buffer.device()),
       _buffer(buffer),
       _nested_size(nested_size),
-      _nested_stride(nested_stride),
       _is_pinned(_buffer.is_pinned()),
-      _is_contiguous(torch::nested_tensor::impl::storage_is_contiguous(
-          _buffer,
-          _nested_size,
-          _nested_stride)),
-      _is_contiguous_channels_last(
-          torch::nested_tensor::impl::storage_is_contiguous_channels_last(
-              _buffer,
-              _nested_size,
-              _nested_stride)) {
+      _is_contiguous(true) {
   remove_autograd_key();
   key_set_ =
       key_set_ - c10::DispatchKeySet({c10::DispatchKey::ADInplaceOrView});
 }
-
-NestedTensorImpl::NestedTensorImpl(
-    at::Tensor&& buffer,
-    EfficientSizeNode nested_size)
-    : NestedTensorImpl(
-          std::move(buffer),
-          nested_size,
-          torch::nested_tensor::impl::_cont_stride(nested_size)) {}
 
 int64_t NestedTensor_size_int(const Tensor& self, int64_t dim) {
   std::vector<c10::optional<int64_t>> size =
@@ -60,21 +42,6 @@ int64_t nt_size(Tensor tensor, int64_t dim) {
   }
   throw std::runtime_error(
       "NestedTensor size at dim is not Tensor shape compliant.");
-}
-
-at::Tensor wrap_buffer(
-    at::Tensor&& buffer,
-    EfficientSizeNode efficient_nested_size,
-    EfficientSizeNode efficient_nested_stride) {
-  TORCH_CHECK(buffer.is_contiguous(), "Given buffer must be contiguous.");
-  TORCH_CHECK(
-      efficient_nested_size.height() > 0,
-      "Internal error: expected nested_size of non-zero height.");
-  TORCH_CHECK(
-      efficient_nested_stride.height() > 0,
-      "Internal error: expected nested_size of non-zero height.");
-  return at::detail::make_tensor<NestedTensorImpl>(
-      std::move(buffer), efficient_nested_size, efficient_nested_stride);
 }
 
 at::Tensor wrap_buffer(
