@@ -121,10 +121,6 @@ struct NestedTensorImpl : public c10::TensorImpl {
 
 int64_t nt_size(Tensor tensor, int64_t dim);
 
-Tensor NestedTensor_to_nested_tensor(
-    at::Tensor input,
-    c10::optional<int64_t> dim__);
-
 inline at::native::NestedTensorImpl* get_nested_tensor_impl(
     const at::Tensor tensor) {
   if (!is_nested_tensor_impl(tensor)) {
@@ -138,13 +134,6 @@ inline at::Tensor get_buffer(const at::Tensor& tensor) {
   return get_nested_tensor_impl(tensor)->get_buffer();
 }
 
-inline const std::vector<c10::optional<int64_t>> get_opt_sizes(
-    const at::Tensor& tensor) {
-  TORCH_CHECK(
-      is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
-  return get_nested_tensor_impl(tensor)->opt_sizes();
-}
-
 inline const EfficientSizeNode get_efficient_nested_size(
     const at::Tensor& tensor) {
   TORCH_CHECK(
@@ -152,71 +141,10 @@ inline const EfficientSizeNode get_efficient_nested_size(
   return get_nested_tensor_impl(tensor)->get_nested_size();
 }
 
-// inline const EfficientSizeNode get_efficient_nested_stride(
-//     const at::Tensor& tensor) {
-//   TORCH_CHECK(
-//       is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
-//   return get_nested_tensor_impl(tensor)->get_nested_stride();
-// }
-
-inline int64_t get_dim(const at::Tensor& tensor) {
-  if (is_nested_tensor_impl(tensor)) {
-    return get_nested_tensor_impl(tensor)->get_nested_size().dim();
-  }
-  return tensor.dim();
-}
-
-inline const caffe2::TypeMeta get_dtype(const at::Tensor& tensor) {
-  return tensor.dtype();
-}
-
-inline int64_t get_numel(const at::Tensor& tensor) {
-  if (is_nested_tensor_impl(tensor)) {
-    return get_nested_tensor_impl(tensor)->get_nested_size().numel();
-  }
-  return tensor.numel();
-}
-
-inline bool get_is_contiguous(
-    const at::Tensor& tensor,
-    at::MemoryFormat memory_format = MemoryFormat::Contiguous) {
-  if (is_nested_tensor_impl(tensor)) {
-    return get_nested_tensor_impl(tensor)->get_is_contiguous(memory_format);
-  }
-  return tensor.is_contiguous(memory_format);
-}
-
-inline bool get_is_cuda(
-    const at::Tensor& tensor,
-    at::MemoryFormat memory_format = MemoryFormat::Contiguous) {
-  if (is_nested_tensor_impl(tensor)) {
-    return get_nested_tensor_impl(tensor)->get_is_cuda();
-  }
-  return tensor.is_cuda();
-}
-
-inline int64_t get_nested_dim(const at::Tensor& tensor) {
-  TORCH_CHECK(
-      is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
-  return get_nested_tensor_impl(tensor)->nested_dim();
-}
-
 at::Tensor wrap_tensor_node(NestedTensorImpl);
 at::Tensor wrap_buffer(
     at::Tensor&&,
     EfficientSizeNode efficient_nested_size);
-//    EfficientSizeNode efficient_nested_stride);
-at::Tensor wrap_buffer(at::Tensor&&, EfficientSizeNode efficient_nested_size);
-
-inline bool is_tensor_shape(const at::Tensor tensor) {
-  auto nt = get_nested_tensor_impl(tensor);
-  for (const auto& size : nt->opt_sizes()) {
-    if (!size) {
-      return false;
-    }
-  }
-  return true;
-}
 
 } // namespace native
 } // namespace at
