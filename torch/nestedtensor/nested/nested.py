@@ -99,9 +99,6 @@ class NestedTensor(metaclass=NestedTensorMeta):
         # This NT only supports nesting of 1.
         return 1
 
-    def size(self, dim):
-        return torch.nested_tensor_size_int(self._impl, dim)
-
     def __str__(self):
         def _str(x, indent=0, tab="  "):
             s = indent*tab + "[\n"

@@ -12,7 +12,7 @@ NestedTensorImpl::NestedTensorImpl(
     at::Tensor&& buffer,
     EfficientSizeNode nested_size)
     : TensorImpl(
-          c10::DispatchKeySet({NestedTensorKey}),
+          c10::DispatchKeySet({DispatchKey::NestedTensor}),
           buffer.dtype(),
           buffer.device()),
       _buffer(buffer),
@@ -22,23 +22,6 @@ NestedTensorImpl::NestedTensorImpl(
   remove_autograd_key();
   key_set_ =
       key_set_ - c10::DispatchKeySet({c10::DispatchKey::ADInplaceOrView});
-}
-
-int64_t NestedTensor_size_int(const Tensor& self, int64_t dim) {
-  std::vector<c10::optional<int64_t>> size =
-      get_nested_tensor_impl(self)->opt_sizes();
-  TORCH_CHECK(size[dim], "NestedTensor is not regular at dimension ", dim, ".");
-  return *(size[dim]);
-}
-
-int64_t nt_size(Tensor tensor, int64_t dim) {
-  auto impl = get_nested_tensor_impl(tensor);
-  std::vector<c10::optional<int64_t>> size = impl->opt_sizes();
-  if (size[dim]) {
-    return *(size[dim]);
-  }
-  throw std::runtime_error(
-      "NestedTensor size at dim is not Tensor shape compliant.");
 }
 
 at::Tensor wrap_buffer(

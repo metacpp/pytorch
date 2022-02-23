@@ -7,39 +7,10 @@
 namespace at {
 namespace native {
 
-namespace impl {
-
-inline std::vector<c10::optional<int64_t>> construct_efficient_size(
-    int64_t out,
-    const at::Tensor& sizes) {
-  std::vector<c10::optional<int64_t>> result;
-  result.push_back(out);
-  size_t nested_dim = result.size();
-  if (sizes.dim() > 0) {
-    int64_t* sizes_ptr = sizes.data_ptr<int64_t>();
-    result.resize(nested_dim + sizes.size(1));
-    for (int64_t i = 0; i < sizes.size(1); i++) {
-      result[nested_dim + i] = sizes_ptr[i];
-    }
-    for (int64_t j = 0; j < sizes.size(1); j++) {
-      for (int64_t i = 0; i < sizes.size(0); i++) {
-        if (result[nested_dim + j] &&
-            (result[nested_dim + j] != sizes_ptr[i * sizes.size(1) + j])) {
-          result[nested_dim + j] = c10::nullopt;
-        }
-      }
-    }
-  }
-  return result;
-}
-
-} // namespace impl
-
 struct EfficientSizeNode {
   explicit EfficientSizeNode(int64_t structure, const at::Tensor& sizes)
-      : _structure(structure),
-        _sizes(sizes),
-        _opt_sizes(impl::construct_efficient_size(_structure, _sizes)) {}
+      : _num_entries(structure),
+        _sizes(sizes) {}
 
   int64_t height() const {
     return 1;
@@ -53,24 +24,12 @@ struct EfficientSizeNode {
   int64_t dim() const {
     return _sizes.dim() > 0 ? 1 + _sizes.size(1) : 1;
   }
-  const std::vector<c10::optional<int64_t>>& opt_sizes() const {
-    return _opt_sizes;
-  }
-  void refresh_opt_sizes() {
-    _opt_sizes = impl::construct_efficient_size(_structure, _sizes);
-  }
   const at::Tensor& sizes() const {
     return _sizes;
   }
-  int64_t structure() const {
-    return _structure;
-  }
-  EfficientSizeNode clone() const {
-    return EfficientSizeNode(_structure, _sizes.clone());
-  }
   int64_t numel() const {
-    if (_sizes.dim() == 0 && _structure > 0) {
-      return _structure;
+    if (_sizes.dim() == 0 && _num_entries > 0) {
+      return _num_entries;
     }
     if (_sizes.dim() > 0) {
       if (_sizes.numel() == 0) {
@@ -89,31 +48,13 @@ struct EfficientSizeNode {
   }
 
  private:
-  int64_t _structure;
+  int64_t _num_entries;
   const at::Tensor _sizes;
-  bool _opt_sizes_set = false;
-  std::vector<c10::optional<int64_t>> _opt_sizes;
 };
 
-constexpr auto NestedTensorKey = DispatchKey::NestedTensor;
-
-struct NestedTensorImpl;
-
-template <class A>
-bool is_nested_tensor_impl(A tensor) {
+bool is_nested_tensor_impl(at::Tensor tensor) {
   return tensor.unsafeGetTensorImpl()->key_set().has(
       c10::DispatchKey::NestedTensor);
-}
-
-template <class A, class B>
-bool is_nested_tensor_impl(A first, B other) {
-  return is_nested_tensor_impl(first) && is_nested_tensor_impl(other);
-}
-
-template <class A, class B, class... C>
-bool is_nested_tensor_impl(A first, B second, C... other) {
-  return is_nested_tensor_impl(first, second) &&
-      is_nested_tensor_impl(other...);
 }
 
 struct NestedTensorImpl : public c10::TensorImpl {
@@ -140,18 +81,6 @@ struct NestedTensorImpl : public c10::TensorImpl {
 #endif
   EfficientSizeNode get_nested_size() {
     return _nested_size;
-  }
-//   EfficientSizeNode get_nested_stride() {
-//     return _nested_stride;
-//   }
-  int64_t nested_dim() const {
-    return _nested_size.height();
-  }
-  bool is_pinned() const {
-    return _buffer.is_pinned();
-  }
-  const std::vector<c10::optional<int64_t>> opt_sizes() const {
-    return _nested_size.opt_sizes();
   }
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
   IntArrayRef sizes() const override {
@@ -180,31 +109,12 @@ struct NestedTensorImpl : public c10::TensorImpl {
     return _buffer;
   }
 
-  bool get_is_cuda() const {
-    return _buffer.is_cuda();
-  }
-
-  bool get_is_contiguous(at::MemoryFormat memory_format) const {
-    if (memory_format == at::MemoryFormat::Contiguous) {
-      return _is_contiguous;
-    }
-    TORCH_CHECK(
-        false, "is_contiguous does not support memory format ", memory_format);
-    return false;
-  }
-
-  bool get_is_pinned() const {
-    return _is_pinned;
-  }
-
  private:
   at::Tensor _buffer;
   const EfficientSizeNode _nested_size;
   bool _is_pinned;
   const bool _is_contiguous;
 };
-
-int64_t nt_size(Tensor tensor, int64_t dim);
 
 inline at::native::NestedTensorImpl* get_nested_tensor_impl(
     const at::Tensor tensor) {
