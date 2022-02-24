@@ -820,6 +820,7 @@ from torch import __future__ as __future__
 from torch import profiler as profiler
 
 from torch.nested._nestedtensor import NestedTensor
+from torch.nested._nestedtensor import nested_tensor
 
 _C._init_names(list(torch._storage_classes))
 

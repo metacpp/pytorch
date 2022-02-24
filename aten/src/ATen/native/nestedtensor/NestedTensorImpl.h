@@ -69,9 +69,9 @@ struct NestedTensorImpl : public c10::TensorImpl {
 
 inline at::native::NestedTensorImpl* get_nested_tensor_impl(
     const at::Tensor tensor) {
-  if (!is_nested_tensor_impl(tensor)) {
-    throw std::runtime_error("Function requires NestedTensorImpl");
-  }
+  TORCH_CHECK(
+      is_nested_tensor_impl(tensor),
+      "get_nested_tensor_impl requires a NestedTensor.");
   return static_cast<at::native::NestedTensorImpl*>(
       tensor.unsafeGetTensorImpl());
 }

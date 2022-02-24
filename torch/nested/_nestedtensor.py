@@ -1,5 +1,6 @@
 import torch
 import numbers
+from functools import wraps
 
 
 def _filter_impl(args, kwargs):
@@ -37,12 +38,24 @@ def _wrap_result(result):
         else result
     )
 
+@wraps(torch._nested_tensor)
 def nested_tensor(*args, **kwargs):
     return NestedTensor(torch._nested_tensor(*args, **kwargs))
 
 
-class NestedTensor:
+class NestedTensor(torch.Tensor):
     # data is a torch.Tensor backed by a NestedTensorImpl
+
+    @staticmethod
+    def __new__(cls, impl):
+        # Use a Tensor that of the give size for the wrapper.
+        kwargs = {}
+        kwargs["device"] = impl.device
+        kwargs["dtype"] = impl.dtype
+        kwargs["layout"] = impl.layout
+        kwargs["requires_grad"] = impl.requires_grad
+        size = tuple([1] * impl.dim())
+        return torch.Tensor._make_wrapper_subclass(cls, size, **kwargs)
 
     def __init__(self, impl):
         self._impl = impl
@@ -96,7 +109,10 @@ class NestedTensor:
     def __repr__(self):
         return self.__str__()
 
-    def __torch_function__(self, func, types, args=(), kwargs=None):
+    @classmethod
+    def __torch_dispatch__(cls, func, types, args, kwargs):
         print("func: ", func)
+        print("args: ", type(args[0]))
         impl_args, impl_kwargs = _filter_impl(args, kwargs)
+        print("impl_args: ", type(impl_args[0]))
         return _wrap_result(func(*impl_args, **impl_kwargs))

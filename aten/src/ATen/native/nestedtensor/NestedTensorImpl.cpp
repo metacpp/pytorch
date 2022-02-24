@@ -77,14 +77,30 @@ Tensor _nested_tensor(
       TensorOptions().dtype(dtype).layout(layout).device(device).pinned_memory(
           pin_memory);
 
+  if (list.size() == 0) {
+    return wrap_buffer(ones({0}), ones({}));
+  }
   std::vector<Tensor> sizes;
   std::vector<Tensor> flat_tensors;
   for (size_t i = 0; i < list.size(); i++) {
+    if (i > 0) {
+      int64_t dim_i = flat_tensors[i].dim();
+      int64_t dim_prev = flat_tensors[i - 1].dim();
+      TORCH_CHECK(
+          dim_i == dim_prev,
+          "All Tensors given to nested_tensor must have the same dimension. ",
+          "Found dimension ",
+          dim_i,
+          " for Tensor at index ",
+          i,
+          " and dimension ",
+          dim_prev,
+          " for Tensor at index ",
+          i - 1,
+          ".");
+    }
     flat_tensors.push_back(list[i].reshape(-1).contiguous());
     sizes.push_back(tensor(c10::IntArrayRef(list[i].sizes())));
-  }
-  if (flat_tensors.size() == 0) {
-    return wrap_buffer(ones({0}), ones({}));
   }
 
   TensorOptions options = flat_tensors[0].options().merge_in(options_);
@@ -92,6 +108,14 @@ Tensor _nested_tensor(
   return wrap_buffer(
       at::native::cat(at::TensorList(flat_tensors)).to(options),
       at::native::stack(at::TensorList(sizes)));
+}
+
+Tensor nested_tensor_alias(
+    const Tensor& self) {
+  TORCH_CHECK(!self.is_quantized(), "NestedTensor alias does not accepted a quantized Tensor.");
+  auto buffer = get_buffer(self);
+  auto sizes = get_nested_size_tensor(self);
+  return at::detail::make_tensor<NestedTensorImpl>(buffer, sizes);
 }
 
 } // namespace native
