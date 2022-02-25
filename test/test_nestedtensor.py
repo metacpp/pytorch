@@ -156,7 +156,7 @@ class TestNestedTensor(TestCase):
         self.assertEqual(str(a), expected)
         self.assertEqual(repr(a), expected)
 
-        a = nested_tensor([torch.tensor(1.),])
+        a = nested_tensor([torch.tensor(1.)])
         expected = "nested_tensor([" "\n  tensor(1.)" "\n])"
         self.assertEqual(str(a), expected)
         self.assertEqual(repr(a), expected)
