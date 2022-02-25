@@ -15,8 +15,8 @@ NestedTensorImpl::NestedTensorImpl(
           c10::DispatchKeySet({DispatchKey::NestedTensor}),
           buffer.dtype(),
           buffer.device()),
-      _buffer(buffer),
-      _nested_size_tensor(nested_size_tensor) {
+      _buffer(std::move(buffer)),
+      _nested_size_tensor(std::move(nested_size_tensor)) {
   remove_autograd_key();
   key_set_ =
       key_set_ - c10::DispatchKeySet({c10::DispatchKey::ADInplaceOrView});
@@ -25,7 +25,7 @@ NestedTensorImpl::NestedTensorImpl(
 at::Tensor wrap_buffer(at::Tensor buffer, at::Tensor nested_size_tensor) {
   TORCH_CHECK(buffer.is_contiguous(), "Given buffer must be contiguous.");
   return at::detail::make_tensor<NestedTensorImpl>(
-      std::move(buffer), nested_size_tensor);
+      std::move(buffer), std::move(nested_size_tensor));
 }
 
 std::vector<at::Tensor> NestedTensor_unbind(
@@ -45,22 +45,18 @@ std::vector<at::Tensor> NestedTensor_unbind(
   }
   auto esizes_chunks = esizes.unbind(0);
   std::vector<int64_t> splits;
-  for (int64_t i = 0; i < esizes_chunks.size(); i++) {
+  for(const auto i : c10::irange(esizes_chunks.size())) {
     splits.push_back(esizes_chunks[i].prod().item<int64_t>());
   }
   auto buffer_chunks = at::split_with_sizes(buffer, IntArrayRef(splits));
   for (int64_t i = 0; i < buffer_chunks.size(); i++) {
-    auto esize_chunk = esizes_chunks[i];
+    const auto& esize_chunk = esizes_chunks[i];
     std::vector<int64_t> esize_vector(
         esize_chunk.data_ptr<int64_t>(),
         esize_chunk.data_ptr<int64_t>() + esize_chunk.numel());
     result_tensors.push_back(buffer_chunks[i].view(IntArrayRef(esize_vector)));
   }
   return result_tensors;
-}
-
-bool is_nt_impl(const Tensor& tensor) {
-  return is_nested_tensor_impl(tensor);
 }
 
 /*
@@ -84,8 +80,8 @@ Tensor _nested_tensor(
   std::vector<Tensor> flat_tensors;
   for (size_t i = 0; i < list.size(); i++) {
     if (i > 0) {
-      int64_t dim_i = flat_tensors[i].dim();
-      int64_t dim_prev = flat_tensors[i - 1].dim();
+      int64_t dim_i = list[i].dim();
+      int64_t dim_prev = list[i - 1].dim();
       TORCH_CHECK(
           dim_i == dim_prev,
           "All Tensors given to nested_tensor must have the same dimension. ",

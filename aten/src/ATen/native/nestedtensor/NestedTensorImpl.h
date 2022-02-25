@@ -7,7 +7,7 @@
 namespace at {
 namespace native {
 
-bool is_nested_tensor_impl(at::Tensor tensor) {
+bool is_nested_tensor_impl(const at::Tensor& tensor) {
   return tensor.unsafeGetTensorImpl()->key_set().has(
       c10::DispatchKey::NestedTensor);
 }
@@ -68,7 +68,7 @@ struct NestedTensorImpl : public c10::TensorImpl {
 };
 
 inline at::native::NestedTensorImpl* get_nested_tensor_impl(
-    const at::Tensor tensor) {
+    const at::Tensor& tensor) {
   TORCH_CHECK(
       is_nested_tensor_impl(tensor),
       "get_nested_tensor_impl requires a NestedTensor.");
@@ -81,8 +81,6 @@ inline at::Tensor get_buffer(const at::Tensor& tensor) {
 }
 
 inline const at::Tensor get_nested_size_tensor(const at::Tensor& tensor) {
-  TORCH_CHECK(
-      is_nested_tensor_impl(tensor), "Given tensor must be NestedTensor.");
   return get_nested_tensor_impl(tensor)->get_nested_size_tensor();
 }
 

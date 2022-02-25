@@ -3,59 +3,13 @@ import numbers
 from functools import wraps
 
 
-def _filter_impl(args, kwargs):
-    if kwargs is None:
-        kwargs = {}
-    impl_args = []
-    for a in args:
-        if isinstance(a, torch.NestedTensor):
-            impl_args.append(a._impl)
-        elif torch.is_tensor(a):
-            impl_args.append(a)
-        elif isinstance(a, list):
-            a_impl, _ = _filter_impl(a, {})
-            impl_args.append(a_impl)
-        elif isinstance(a, tuple):
-            a_impl, _ = _filter_impl(a, {})
-            impl_args.append(tuple(a_impl))
-        else:
-            impl_args.append(a)
-    impl_kwargs = {
-        k: v._impl if isinstance(v, torch.NestedTensor) else v
-        for (k, v) in kwargs.items()
-    }
-    return impl_args, impl_kwargs
-
-
-def _wrap_result(result):
-    if isinstance(result, list):
-        return list(_wrap_result(r) for r in result)
-    if isinstance(result, tuple):
-        return tuple(_wrap_result(r) for r in result)
-    return (
-        torch.NestedTensor(result)
-        if torch.is_tensor(result) and torch.is_nt_impl(result)
-        else result
-    )
-
 @wraps(torch._nested_tensor)
 def nested_tensor(*args, **kwargs):
     return NestedTensor(torch._nested_tensor(*args, **kwargs))
 
 
-class NestedTensor(torch.Tensor):
+class NestedTensor:
     # data is a torch.Tensor backed by a NestedTensorImpl
-
-    @staticmethod
-    def __new__(cls, impl):
-        # Use a Tensor that of the give size for the wrapper.
-        kwargs = {}
-        kwargs["device"] = impl.device
-        kwargs["dtype"] = impl.dtype
-        kwargs["layout"] = impl.layout
-        kwargs["requires_grad"] = impl.requires_grad
-        size = tuple([1] * impl.dim())
-        return torch.Tensor._make_wrapper_subclass(cls, size, **kwargs)
 
     def __init__(self, impl):
         self._impl = impl
@@ -88,6 +42,36 @@ class NestedTensor(torch.Tensor):
         """
         return self._impl.requires_grad
 
+    def stride(self):
+        """
+        The stride of ```self``` NestedTensor.
+        """
+        return self._impl.stride()
+
+    def size(self):
+        """
+        The size of ```self``` NestedTensor.
+        """
+        return self._impl.size()
+
+    def dim(self):
+        """
+        The dimension of ```self``` NestedTensor.
+        """
+        return self._impl.dim()
+
+    def numel(self):
+        """
+        The number of elements of ```self``` NestedTensor.
+        """
+        return self._impl.numel()
+
+    def is_contiguous(self):
+        """
+        Returns true if ```self``` NestedTensor is contiguous.
+        """
+        return self._impl.is_contiguous()
+
     def __str__(self):
         def _str(x, indent=0, tab="  "):
             s = indent * tab + "[\n"
@@ -109,10 +93,9 @@ class NestedTensor(torch.Tensor):
     def __repr__(self):
         return self.__str__()
 
-    @classmethod
-    def __torch_dispatch__(cls, func, types, args, kwargs):
-        print("func: ", func)
-        print("args: ", type(args[0]))
-        impl_args, impl_kwargs = _filter_impl(args, kwargs)
-        print("impl_args: ", type(impl_args[0]))
-        return _wrap_result(func(*impl_args, **impl_kwargs))
+    def unbind(self, dim=None):
+        if self._impl.dim() == 0 and dim is None:
+            return ()
+        if dim is None:
+            dim = 0
+        return torch.ops.aten.unbind.int(self._impl, dim)
