@@ -38,7 +38,6 @@ std::vector<at::Tensor> NestedTensor_unbind(
       dim,
       " instead.");
   auto esizes = get_nested_size_tensor(self);
-  auto buffer = get_buffer(self);
   std::vector<at::Tensor> result_tensors;
   if (esizes.dim() == 0) {
     return result_tensors;
@@ -48,8 +47,9 @@ std::vector<at::Tensor> NestedTensor_unbind(
   for (const auto i : c10::irange(esizes_chunks.size())) {
     splits.push_back(esizes_chunks[i].prod().item<int64_t>());
   }
-  auto buffer_chunks = at::split_with_sizes(buffer, IntArrayRef(splits));
-  for (int64_t i = 0; i < buffer_chunks.size(); i++) {
+  auto buffer_chunks =
+      at::split_with_sizes(get_buffer(self), IntArrayRef(splits));
+  for (const auto i : c10::irange(buffer_chunks.size())) {
     const auto& esize_chunk = esizes_chunks[i];
     result_tensors.push_back(buffer_chunks[i].view(IntArrayRef(
         esize_chunk.data_ptr<int64_t>(),
@@ -77,7 +77,7 @@ Tensor _nested_tensor(
   }
   std::vector<Tensor> sizes;
   std::vector<Tensor> flat_tensors;
-  for (size_t i = 0; i < list.size(); i++) {
+  for (const auto i : c10::irange(list.size())) {
     if (i > 0) {
       int64_t dim_i = list[i].dim();
       int64_t dim_prev = list[i - 1].dim();
@@ -94,6 +94,7 @@ Tensor _nested_tensor(
           i - 1,
           ".");
     }
+    // TODO: Remove call to contiguous once we support strides.
     flat_tensors.push_back(list[i].reshape(-1).contiguous());
     sizes.push_back(tensor(c10::IntArrayRef(list[i].sizes())));
   }

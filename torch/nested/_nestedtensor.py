@@ -43,13 +43,13 @@ class NestedTensor:
 
     def stride(self):
         """
-        The stride of ```self``` NestedTensor.
+        NestedTensor currently does not have a stride. This will throw.
         """
         return self._impl.stride()
 
     def size(self):
         """
-        The size of ```self``` NestedTensor.
+        NestedTensor currently does not have a size. This will throw.
         """
         return self._impl.size()
 
