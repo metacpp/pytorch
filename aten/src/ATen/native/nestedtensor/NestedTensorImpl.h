@@ -32,7 +32,7 @@ struct NestedTensorImpl : public c10::TensorImpl {
         "is_contiguous is disabled. These methods are not virtual in fbcode.");
   }
 #endif
-  Tensor get_nested_size_tensor() {
+  const Tensor& get_nested_size_tensor() {
     return _nested_size_tensor;
   }
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
@@ -40,8 +40,7 @@ struct NestedTensorImpl : public c10::TensorImpl {
     TORCH_CHECK(
         false,
         "Internal error: NestedTensorImpl doesn't support sizes. Please file an issue on https://github.com/pytorch/nestedtensor");
-    std::vector<int64_t> sizes;
-    return IntArrayRef(sizes);
+    return IntArrayRef();
   }
 #endif
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
@@ -49,16 +48,11 @@ struct NestedTensorImpl : public c10::TensorImpl {
     TORCH_CHECK(
         false,
         "Internal error: NestedTensorImpl doesn't support strides. Please file an issue on https://github.com/pytorch/nestedtensor");
-    std::vector<int64_t> strides;
-    return IntArrayRef(strides);
+    return IntArrayRef();
   }
 #endif
 
   const at::Tensor& get_buffer() const {
-    return _buffer;
-  }
-
-  at::Tensor& get_buffer() {
     return _buffer;
   }
 
@@ -76,11 +70,11 @@ inline at::native::NestedTensorImpl* get_nested_tensor_impl(
       tensor.unsafeGetTensorImpl());
 }
 
-inline at::Tensor get_buffer(const at::Tensor& tensor) {
+inline const at::Tensor& get_buffer(const at::Tensor& tensor) {
   return get_nested_tensor_impl(tensor)->get_buffer();
 }
 
-inline const at::Tensor get_nested_size_tensor(const at::Tensor& tensor) {
+inline const at::Tensor& get_nested_size_tensor(const at::Tensor& tensor) {
   return get_nested_tensor_impl(tensor)->get_nested_size_tensor();
 }
 

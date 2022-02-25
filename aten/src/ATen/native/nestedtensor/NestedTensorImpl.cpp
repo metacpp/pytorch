@@ -51,10 +51,9 @@ std::vector<at::Tensor> NestedTensor_unbind(
   auto buffer_chunks = at::split_with_sizes(buffer, IntArrayRef(splits));
   for (int64_t i = 0; i < buffer_chunks.size(); i++) {
     const auto& esize_chunk = esizes_chunks[i];
-    std::vector<int64_t> esize_vector(
+    result_tensors.push_back(buffer_chunks[i].view(IntArrayRef(
         esize_chunk.data_ptr<int64_t>(),
-        esize_chunk.data_ptr<int64_t>() + esize_chunk.numel());
-    result_tensors.push_back(buffer_chunks[i].view(IntArrayRef(esize_vector)));
+        esize_chunk.data_ptr<int64_t>() + esize_chunk.numel())));
   }
   return result_tensors;
 }
