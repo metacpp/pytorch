@@ -7859,7 +7859,6 @@
   variants: method, function
   dispatch:
     CompositeExplicitAutograd: alias
-    NestedTensor: nested_tensor_alias
 
 - func: _amp_foreach_non_finite_check_and_unscale_(Tensor(a!)[] self, Tensor(b!) found_inf, Tensor inv_scale) -> ()
   variants: function

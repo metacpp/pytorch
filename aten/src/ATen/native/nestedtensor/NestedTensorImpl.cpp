@@ -45,7 +45,7 @@ std::vector<at::Tensor> NestedTensor_unbind(
   }
   auto esizes_chunks = esizes.unbind(0);
   std::vector<int64_t> splits;
-  for(const auto i : c10::irange(esizes_chunks.size())) {
+  for (const auto i : c10::irange(esizes_chunks.size())) {
     splits.push_back(esizes_chunks[i].prod().item<int64_t>());
   }
   auto buffer_chunks = at::split_with_sizes(buffer, IntArrayRef(splits));
@@ -104,14 +104,6 @@ Tensor _nested_tensor(
   return wrap_buffer(
       at::native::cat(at::TensorList(flat_tensors)).to(options),
       at::native::stack(at::TensorList(sizes)));
-}
-
-Tensor nested_tensor_alias(
-    const Tensor& self) {
-  TORCH_CHECK(!self.is_quantized(), "NestedTensor alias does not accepted a quantized Tensor.");
-  auto buffer = get_buffer(self);
-  auto sizes = get_nested_size_tensor(self);
-  return at::detail::make_tensor<NestedTensorImpl>(buffer, sizes);
 }
 
 } // namespace native
