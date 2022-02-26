@@ -8,6 +8,10 @@ on:
       - main
       - release/*
 
+concurrency:
+  group: pull-${{ github.event.pull_request.number || github.sha }}-${{ github.event_name == 'workflow_dispatch' }}
+  cancel-in-progress: true
+
 env:
   IN_CI: 1 # TODO delete in favor of GITHUB_ACTIONS
   IS_GHA: 1 # TODO delete in favor of GITHUB_ACTIONS
