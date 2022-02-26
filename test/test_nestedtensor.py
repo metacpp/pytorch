@@ -98,6 +98,11 @@ class TestNestedTensor(TestCase):
             "Found dimension 1 for Tensor at index 1 and dimension 0 for Tensor at index 0.",
             lambda: nested_tensor([torch.tensor(1.0), torch.tensor([])]),
         )
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Found dimension 1 for Tensor at index 2 and dimension 0 for Tensor at index 1.",
+            lambda: nested_tensor([torch.tensor(1.0), torch.tensor(2.0), torch.tensor([])]),
+        )
 
     @torch.inference_mode()
     def test_default_nested_tensor(self):
