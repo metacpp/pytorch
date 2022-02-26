@@ -277,6 +277,7 @@ coverage_missing_automodule = [
     "torch.quantization",
     "torch.quantization.fx",
     "torch.sparse",
+    "torch.nested",
     "torch.special",
     "torch.utils",
     "torch.utils.backcompat",

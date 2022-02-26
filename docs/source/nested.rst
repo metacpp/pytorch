@@ -1,6 +1,6 @@
 .. currentmodule:: torch
 
-.. _sparse-docs:
+.. _nested-docs:
 
 torch.nested
 ============
