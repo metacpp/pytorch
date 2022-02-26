@@ -48,7 +48,6 @@ class TestNestedTensor(TestCase):
 
     @torch.inference_mode()
     def test_unbind_3(self):
-        print("ASDF")
         self._test_unbind_case(
             torch.tensor([1.0]), torch.tensor([]),
         )
