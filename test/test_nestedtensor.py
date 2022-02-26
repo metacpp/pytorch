@@ -1,7 +1,7 @@
 # Owner(s): ["module: nestedtensor"]
 
 import torch
-from torch.testing._internal.common_utils import TestCase, load_tests, parametrize
+from torch.testing._internal.common_utils import TestCase
 from torch import nested_tensor
 
 # Tests are ported from pytorch/nestedtensor.
