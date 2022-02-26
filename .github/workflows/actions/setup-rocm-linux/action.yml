@@ -5,11 +5,6 @@ description: Set up ROCm host for CI
 runs:
   using: composite
   steps:
-    - name: Clean workspace
-      shell: bash
-      run: |
-        rm -rf "${GITHUB_WORKSPACE}"
-        mkdir "${GITHUB_WORKSPACE}"
     - name: Set DOCKER_HOST
       shell: bash
       run: echo "DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock" >> "${GITHUB_ENV}"
