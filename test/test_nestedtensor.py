@@ -60,12 +60,6 @@ class TestNestedTensor(TestCase):
         )
 
     @torch.inference_mode()
-    def test_unbind_5(self):
-        self._test_unbind_case(
-            torch.tensor(0.1), torch.tensor([]),
-        )
-
-    @torch.inference_mode()
     def test_unbind_dim(self):
         def _test_fn(unbind_fn):
             a = torch.rand(3, 2)
