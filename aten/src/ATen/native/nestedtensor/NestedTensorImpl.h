@@ -16,7 +16,7 @@ struct NestedTensorImpl : public c10::TensorImpl {
   explicit NestedTensorImpl(at::Tensor buffer, at::Tensor nested_size_tensor);
 
   int64_t dim() const override {
-    return _nested_size_tensor.dim() > 0 ? 1 + _nested_size_tensor.size(1) : 1;
+    return nested_size_tensor_.dim() > 0 ? 1 + nested_size_tensor_.size(1) : 1;
   }
 
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
@@ -33,7 +33,7 @@ struct NestedTensorImpl : public c10::TensorImpl {
   }
 #endif
   const Tensor& get_nested_size_tensor() {
-    return _nested_size_tensor;
+    return nested_size_tensor_;
   }
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
   IntArrayRef sizes() const override {
@@ -53,12 +53,12 @@ struct NestedTensorImpl : public c10::TensorImpl {
 #endif
 
   const at::Tensor& get_buffer() const {
-    return _buffer;
+    return buffer_;
   }
 
  private:
-  at::Tensor _buffer;
-  const at::Tensor _nested_size_tensor;
+  at::Tensor buffer_;
+  const at::Tensor nested_size_tensor_;
 };
 
 inline at::native::NestedTensorImpl* get_nested_tensor_impl(

@@ -1,7 +1,7 @@
 # Owner(s): ["module: nestedtensor"]
 
 import torch
-from torch.testing._internal.common_utils import TestCase, load_tests
+from torch.testing._internal.common_utils import TestCase, load_tests, parametrize
 from torch import nested_tensor
 
 # Tests are ported from pytorch/nestedtensor.
@@ -13,55 +13,63 @@ def _iter_constructors():
 
 class TestNestedTensor(TestCase):
     @torch.inference_mode()
-    def test_unbind(self):
-        def _test_fn(unbind_fn):
-            def _test(a, b, c, d, e):
-                nt = nested_tensor([a, b])
-                a1, b1 = nt.unbind()
-                self.assertTrue(a is not a1)
-                self.assertTrue(b is not b1)
+    def _test_unbind_case(self, a, b):
+        nt = nested_tensor([a, b])
+        a1, b1 = nt.unbind()
+        self.assertTrue(a is not a1)
+        self.assertTrue(b is not b1)
 
-                nt = nested_tensor([a, b], dtype=a.dtype)
-                a1, b1 = unbind_fn(nt, 0)
-                self.assertEqual(a, a1)
-                self.assertEqual(b, b1)
+        nt = nested_tensor([a, b], dtype=a.dtype)
+        print("nt")
+        print(nt)
+        a1, b1 = nt.unbind(0)
+        print("a1")
+        print(a1)
+        print("b1")
+        print(b1)
+        self.assertEqual(a, a1)
+        self.assertEqual(b, b1)
 
-                a = torch.randn((2, 3)).add_(1)
-                nt = nested_tensor([a])
-                self.assertEqual(a, unbind_fn(nt, 0)[0])
+        a = torch.randn((2, 3)).add_(1)
+        nt = nested_tensor([a])
+        self.assertEqual(a, nt.unbind(0)[0])
 
-            _test(
-                torch.tensor([1, 2]),
-                torch.tensor([7, 8]),
-                torch.tensor([3, 4]),
-                torch.tensor([5, 6]),
-                torch.tensor([6, 7]),
-            )
-            _test(
-                torch.tensor([1]),
-                torch.tensor([7]),
-                torch.tensor([3]),
-                torch.tensor([5]),
-                torch.tensor([6]),
-            )
-            _test(
-                torch.tensor(1),
-                torch.tensor(7),
-                torch.tensor(3),
-                torch.tensor(5),
-                torch.tensor(6),
-            )
-            _test(
-                torch.tensor([]),
-                torch.tensor([]),
-                torch.tensor([]),
-                torch.tensor([]),
-                torch.tensor([]),
-            )
+    @torch.inference_mode()
+    def test_unbind_0(self):
+        self._test_unbind_case(
+            torch.tensor([1, 2]), torch.tensor([7, 8]),
+        )
 
-        _test_fn(lambda x, dim: x.unbind(dim))
-        # TODO: Re-enable this once using torch_dispatch
-        # _test_fn(lambda x, dim: torch.unbind(x, dim))
+    @torch.inference_mode()
+    def test_unbind_1(self):
+        self._test_unbind_case(
+            torch.tensor([1]), torch.tensor([7]),
+        )
+
+    @torch.inference_mode()
+    def test_unbind_2(self):
+        self._test_unbind_case(
+            torch.tensor(1), torch.tensor(7),
+        )
+
+    @torch.inference_mode()
+    def test_unbind_3(self):
+        print("ASDF")
+        self._test_unbind_case(
+            torch.tensor([1.0]), torch.tensor([]),
+        )
+
+    @torch.inference_mode()
+    def test_unbind_4(self):
+        self._test_unbind_case(
+            torch.tensor([]), torch.tensor([]),
+        )
+
+    @torch.inference_mode()
+    def test_unbind_5(self):
+        self._test_unbind_case(
+            torch.tensor(0.1), torch.tensor([]),
+        )
 
     @torch.inference_mode()
     def test_unbind_dim(self):
@@ -82,6 +90,14 @@ class TestNestedTensor(TestCase):
         self.assertRaises(TypeError, lambda: nested_tensor([3.0]))
         self.assertRaises(TypeError, lambda: nested_tensor(torch.tensor([3.0])))
         self.assertRaises(TypeError, lambda: nested_tensor(4.0))
+
+    @torch.inference_mode()
+    def test_nested_tensor_matching_dim(self):
+        self.assertRaisesRegex(
+            RuntimeError,
+            "Found dimension 1 for Tensor at index 1 and dimension 0 for Tensor at index 0.",
+            lambda: nested_tensor([torch.tensor(1.0), torch.tensor([])]),
+        )
 
     @torch.inference_mode()
     def test_default_nested_tensor(self):
@@ -156,18 +172,14 @@ class TestNestedTensor(TestCase):
         self.assertEqual(str(a), expected)
         self.assertEqual(repr(a), expected)
 
-        a = nested_tensor([torch.tensor(1.)])
+        a = nested_tensor([torch.tensor(1.0)])
         expected = "nested_tensor([" "\n  tensor(1.)" "\n])"
         self.assertEqual(str(a), expected)
         self.assertEqual(repr(a), expected)
 
         a = nested_tensor([torch.tensor([[1, 2]]), torch.tensor([[4, 5]])])
         expected = (
-            "nested_tensor(["
-            "\n  tensor([[1, 2]])"
-            ","
-            "\n  tensor([[4, 5]])"
-            "\n])"
+            "nested_tensor([" "\n  tensor([[1, 2]])" "," "\n  tensor([[4, 5]])" "\n])"
         )
         self.assertEqual(str(a), expected)
         self.assertEqual(repr(a), expected)
