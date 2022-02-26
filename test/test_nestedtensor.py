@@ -20,13 +20,7 @@ class TestNestedTensor(TestCase):
         self.assertTrue(b is not b1)
 
         nt = nested_tensor([a, b], dtype=a.dtype)
-        print("nt")
-        print(nt)
         a1, b1 = nt.unbind(0)
-        print("a1")
-        print(a1)
-        print("b1")
-        print(b1)
         self.assertEqual(a, a1)
         self.assertEqual(b, b1)
 
@@ -101,7 +95,9 @@ class TestNestedTensor(TestCase):
         self.assertRaisesRegex(
             RuntimeError,
             "Found dimension 1 for Tensor at index 2 and dimension 0 for Tensor at index 1.",
-            lambda: nested_tensor([torch.tensor(1.0), torch.tensor(2.0), torch.tensor([])]),
+            lambda: nested_tensor(
+                [torch.tensor(1.0), torch.tensor(2.0), torch.tensor([])]
+            ),
         )
 
     @torch.inference_mode()

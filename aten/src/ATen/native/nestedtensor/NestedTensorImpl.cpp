@@ -50,8 +50,7 @@ std::vector<at::Tensor> NestedTensor_unbind(
   for (const auto i : c10::irange(esizes_chunks.size())) {
     splits.push_back(esizes_chunks[i].prod().item<int64_t>());
   }
-  auto buffer_chunks =
-      at::split_with_sizes(get_buffer(self), IntArrayRef(splits));
+  auto buffer_chunks = at::split_with_sizes(get_buffer(self), splits);
   for (const auto i : c10::irange(buffer_chunks.size())) {
     const auto& esize_chunk = esizes_chunks[i];
     result_tensors.push_back(buffer_chunks[i].view(IntArrayRef(
@@ -105,8 +104,7 @@ Tensor _nested_tensor(
   TensorOptions options = flat_tensors[0].options().merge_in(options_);
 
   return wrap_buffer(
-      at::native::cat(at::TensorList(flat_tensors)).to(options),
-      at::native::stack(at::TensorList(sizes)));
+      at::native::cat(flat_tensors).to(options), at::native::stack(sizes));
 }
 
 } // namespace native
