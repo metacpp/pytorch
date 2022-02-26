@@ -1,4 +1,4 @@
-name: build
+name: linux-build
 
 on:
   workflow_call:
@@ -21,7 +21,6 @@ on:
       docker-image:
         value: ${{ jobs.build.outputs.docker-image }}
 
-# TODO xla, rocm
 jobs:
   build:
     runs-on: [self-hosted, linux.2xlarge]

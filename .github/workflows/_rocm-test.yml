@@ -58,7 +58,7 @@ jobs:
           SHA1: ${{ github.event.pull_request.head.sha || github.sha }}
           PYTORCH_RETRY_TEST_CASES: 1
           JOB_BASE_NAME: ${{ inputs.build-environment }}-test
-          TEST_CONFIG: default
+          TEST_CONFIG: ${{ matrix.config }}
           SHARD_NUMBER: ${{ matrix.shard }}
           NUM_TEST_SHARDS: ${{ matrix.num_shards }}
           PR_BODY: ${{ github.event.pull_request.body }}

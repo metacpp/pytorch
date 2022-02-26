@@ -44,3 +44,6 @@ runs:
       shell: bash
       run: |
         env | grep '^GITHUB' > "/tmp/github_env_${GITHUB_RUN_ID}"
+    - name: ROCm set GPU_FLAG
+      run: |
+        echo "GPU_FLAG=--device=/dev/mem --device=/dev/kfd --device=/dev/dri --group-add video --group-add daemon" >> "${GITHUB_ENV}"
