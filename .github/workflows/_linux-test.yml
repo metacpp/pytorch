@@ -42,7 +42,7 @@ jobs:
           timeout_minutes: 10
           max_attempts: 3
           command: >-
-            pushd pytorch && bash .github/scripts/install_nvidia_utils_linux.sh && \
+            bash .github/scripts/install_nvidia_utils_linux.sh && \
             echo "GPU_FLAG=--gpus all" >> "${GITHUB_ENV}" && popd
       - name: Determine shm-size
         id: shm
