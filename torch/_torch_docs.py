@@ -12008,3 +12008,32 @@ Example::
     tensor([[2, 3, 5],
             [2, 3, 5]])
 """)
+
+add_docstr(torch.nested_tensor,
+           r"""
+nested_tensor(*list, *, out=None, dtype=None, layout=torch.strided, device=None, requires_grad=False) -> Tensor
+
+Returns a tensor filled with the scalar value `1`, with the shape defined
+by the variable argument :attr:`size`.
+
+Args:
+    size (int...): a sequence of integers defining the shape of the output tensor.
+        Can be a variable number of arguments or a collection like a list or tuple.
+
+Keyword arguments:
+    {out}
+    {dtype}
+    {layout}
+    {device}
+    {requires_grad}
+
+Example::
+
+    >>> torch.ones(2, 3)
+    tensor([[ 1.,  1.,  1.],
+            [ 1.,  1.,  1.]])
+
+    >>> torch.ones(5)
+    tensor([ 1.,  1.,  1.,  1.,  1.])
+
+""".format(**factory_common_args))
