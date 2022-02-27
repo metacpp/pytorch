@@ -230,6 +230,11 @@ filegroup(
 )
 
 filegroup(
+    name = "aten_native_nestedtensor_cpp",
+    srcs = glob(["aten/src/ATen/native/nestedtensor/*.cpp"]),
+)
+
+filegroup(
     name = "aten_native_quantized_cpp",
     srcs = glob(
         [
@@ -398,6 +403,7 @@ cc_library(
         ":aten_native_mkldnn_cpp",
         ":aten_native_quantized_cpp",
         ":aten_native_sparse_cpp",
+        ":aten_native_nestedtensor_cpp",
         ":aten_native_xnnpack",
         ":aten_src_ATen_config",
     ] + generated_cpu_cpp,
