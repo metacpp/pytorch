@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
       - name: Setup EC2 Linux
-        uses: ./.github/workflows/actions/setup-ec2-linux
+        uses: ./.github/actions/setup-ec2-linux
         with:
           github-secret: ${{ secrets.GITHUB_TOKEN }}
       - name: Pull Docker image

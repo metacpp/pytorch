@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
       - name: Setup ROCm
-        uses: ./.github/workflows/actions/setup-rocm-linux
+        uses: ./.github/actions/setup-rocm-linux
       - name: Pull Docker image
         run: |
           retry () { "$@"  || (sleep 1 && "$@") || (sleep 2 && "$@") }
