@@ -12009,7 +12009,7 @@ Example::
             [2, 3, 5]])
 """)
 
-add_docstr(torch.nested_tensor,
+add_docstr(torch._nested_tensor,
            r"""
 nested_tensor(*list, *, out=None, dtype=None, layout=torch.strided, device=None, requires_grad=False) -> Tensor
 
