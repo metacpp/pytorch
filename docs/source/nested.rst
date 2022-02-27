@@ -62,14 +62,3 @@ nested_tensor([
 ])
 >>> nt.unbind()
 [tensor([0., 1., 2.], device='cuda:0'), tensor([3., 4., 5., 6., 7.], device='cuda:0')]
->>> a0, b0 = nt.unbind()
->>> a0 += 4
->>> nt
-nested_tensor([
-  tensor([4., 5., 6.], device='cuda:0'),
-  tensor([3., 4., 5., 6., 7.], device='cuda:0')
-])
-
-The exhibits the usual view behavior.
-
-Ambitious users can also register kernel under the NestedTensor key for their own C++ extensions.
