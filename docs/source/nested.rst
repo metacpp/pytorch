@@ -9,6 +9,11 @@ torch.nested
 
   The PyTorch API of nested tensors is in prototype stage and will change in the near future.
 
+.. warning::
+
+  torch.NestedTensor currently does not support autograd. It needs to be used in the context
+  of torch.inference_mode().
+
 Introduction
 ++++++++++++
 
