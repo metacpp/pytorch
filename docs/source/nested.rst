@@ -11,6 +11,6 @@ Introduction
 :func:`~torch.nested_tensor`
 
 NestedTensor class reference
-----------------------
+----------------------------
 
 .. class:: NestedTensor()
