@@ -12,6 +12,12 @@ NestedTensorImpl::NestedTensorImpl(
     at::Tensor buffer,
     at::Tensor nested_size_tensor)
     : TensorImpl(
+          // TODO: This doesn't properly report is_cpu/is_cuda for NestedTensor.
+          // The intended resolution is that once #72827 lands we will be able to
+          // allocate separate dispatch keys for CPUNestedTensor (and any other
+          // hypothetical device backends for NestedTensor); then we will be
+          // able to derive this directly.  If you need this to work before then,
+          // make sure you add CPU to this dispatch key set
           c10::DispatchKeySet({DispatchKey::NestedTensor}),
           buffer.dtype(),
           buffer.device()),
@@ -31,6 +37,9 @@ at::Tensor wrap_buffer(at::Tensor buffer, at::Tensor nested_size_tensor) {
       std::move(buffer), std::move(nested_size_tensor));
 }
 
+// CPU only!
+// TODO: The algorithm here can be optimized, right now it involves a lot of
+// small tensor manipulations
 std::vector<at::Tensor> NestedTensor_unbind(
     const at::Tensor& self,
     int64_t dim) {
