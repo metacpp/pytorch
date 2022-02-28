@@ -62,7 +62,10 @@ class NestedTensor:
         """
         The dimension of ```self``` NestedTensor.
         """
-        return self._impl.dim()
+        tensors = self.unbind()
+        if len(tensors) == 0:
+            return 1
+        return int(tensors[0].dim() + 1)
 
     def numel(self):
         """
@@ -98,8 +101,9 @@ class NestedTensor:
         return self.__str__()
 
     def unbind(self, dim=None):
-        if self._impl.dim() == 0 and dim is None:
-            return ()
         if dim is None:
-            dim = 0
+            unbound = torch.ops.aten.unbind.int(self._impl, 0)
+            if len(unbound) == 0:
+                return ()
+            return unbound
         return torch.ops.aten.unbind.int(self._impl, dim)

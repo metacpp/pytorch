@@ -15,10 +15,12 @@ bool is_nested_tensor_impl(const at::Tensor& tensor) {
 struct NestedTensorImpl : public c10::TensorImpl {
   explicit NestedTensorImpl(at::Tensor buffer, at::Tensor nested_size_tensor);
 
+#ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
   int64_t dim() const override {
-    return nested_size_tensor_.dim() > 0 ? 1 + nested_size_tensor_.size(1) : 1;
+    TORCH_CHECK(
+        false, "dim is disabled. These methods are not virtual in fbcode.");
   }
-
+#endif
 #ifndef C10_DISABLE_TENSORIMPL_EXTENSIBILITY
   int64_t numel() const override {
     TORCH_CHECK(
