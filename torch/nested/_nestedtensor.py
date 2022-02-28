@@ -7,6 +7,11 @@ def nested_tensor(*args, **kwargs):
     return NestedTensor(torch._nested_tensor(*args, **kwargs))
 
 
+# TODO: This entire class is not really necessary now that NestedTensor lives
+# in tree; before it lived out of tree and there was no way to conveniently
+# override the string printing behavior.  Now that we are in tree, we can
+# directly override _tensor_str to capture this behavior, and the wrapper subclass
+# is not necessary. See also https://github.com/pytorch/pytorch/issues/73506
 class NestedTensor:
     # data is a torch.Tensor backed by a NestedTensorImpl
 
